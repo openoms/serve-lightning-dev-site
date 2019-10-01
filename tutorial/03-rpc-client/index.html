@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Stage 3 - RPC Client</title>
+  <meta name="description" content="Developer resources and documentation for the Lightning Network Daemon.">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="/assets/dropdown.css">
+  <link rel="canonical" href="http://0.0.0.0:4000/tutorial/03-rpc-client/">
+  <link rel="alternate" type="application/rss+xml" title="Lightning Network Developers" href="/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <a class="site-title" href="/">Lightning Network Developers</a>
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          <div class="dropdown">
+            <a class="page-link" href="/guides"><button class="dropbtn">Guides</button></a>
+            <div class="dropdown-content">
+              <a href="/overview/">Overview</a>
+              <a href="/guides/installation/">Installation</a>
+              <a href="/tutorial/">Tutorial</a>
+              <a href="/guides/python-grpc/">Python</a>
+              <a href="/guides/javascript-grpc/">Javascript</a>
+              <a href="/guides/docker/">Docker</a>
+            </div>
+          </div>
+          <a class="page-link" href="//api.lightning.community">API</a>
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stage 3 - RPC Client</h1>
+  </header>
+
+  <div class="post-content">
+    <p>In this section, we will run the finished tutorial app and set up a gRPC client
+for programmatic access to our <code class="highlighter-rouge">lnd</code> nodes.</p>
+
+<h3 id="setting-up-our-web-development-workspace">Setting up our web development workspace</h3>
+
+<p>Let’s set up our news site. Before beginning, ensure that you are running
+Python 2.7 and that you have
+<a href="https://pip.pypa.io/en/stable/installing/"><code class="highlighter-rouge">pip</code></a> and
+<a href="https://virtualenv.pypa.io/en/stable/installation/"><code class="highlighter-rouge">virtualenv</code></a> installed.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Create a new workspace which will hold both the repo and the virtualenv. We</span>
+<span class="c"># recommend running this in a new terminal window.</span>
+<span class="nb">mkdir </span>ln-workspace
+<span class="nb">cd </span>ln-workspace
+
+<span class="c"># Clone the repo</span>
+git clone https://github.com/MaxFangX/lightning-coindesk
+
+<span class="c"># Create virtualenv and activate it. Make sure to activate this environment</span>
+<span class="c"># whenever you are working with the coindesk app.</span>
+virtualenv deskenv
+<span class="nb">source </span>deskenv/bin/activate
+
+<span class="c"># Install webapp Python requirements</span>
+<span class="nb">cd </span>lightning-coindesk
+pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+</code></pre></div></div>
+
+<p>Now, let’s set up Python gRPC so that we can run our website</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Install the dependencies required for gRPC</span>
+pip <span class="nb">install </span>grpcio grpcio-tools googleapis-common-protos
+
+<span class="c"># Run our webserver</span>
+python manage.py runserver
+</code></pre></div></div>
+
+<p>Notice that in <code class="highlighter-rouge">coindesk/settings.py</code> we have set
+<code class="highlighter-rouge">LND_RPCHOST = "localhost:10002"</code>. In other words, your server is connected to
+the “Bob” <code class="highlighter-rouge">lnd</code> node, and making payments to it is equivalent to making
+payments to Bob.</p>
+
+<h3 id="testing-the-app">Testing the app</h3>
+
+<p>If everything went smoothly, you should now have a web server exposed at port</p>
+<ol>
+  <li><img src="http://i.imgur.com/D2LgBUi.png" alt="lightning coindesk homepage" /></li>
+</ol>
+
+<p>Feel free to click around the site. You will soon find that you need to log in
+and make a payment to view the articles.</p>
+
+<p><img src="http://i.imgur.com/zLTEYfk.png" alt="login page" /></p>
+
+<p>To prevent <code class="highlighter-rouge">lnd</code> users from having to go through the hassle of signing up with
+an email address and password, we created an authentication scheme based on the
+user’s <code class="highlighter-rouge">lnd</code> identity pubkey and logging in by signing an arbitrary message. In
+particular, we are signing the CSRF token sent along with the login POST
+request. This scheme is secure against replay attacks because Django generates
+a unique CSRF token for every login attempt, and never reuses CSRF tokens.</p>
+
+<p>Let’s create a new account for Alice by logging in and supplying a username.
+Copy down the generated message (in the screenshot, it is <code class="highlighter-rouge">VcccAuMC...</code>)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli-alice signmessage &lt;GENERATED_MESSAGE&gt;
+<span class="o">{</span>
+    <span class="s2">"signature"</span>: &lt;SIGNATURE&gt;
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Paste <code class="highlighter-rouge">&lt;SIGNATURE&gt;</code> into the corresponding field and set <code class="highlighter-rouge">alice</code> as the desired
+username. You should now be logged in as Alice.</p>
+
+<p><img src="http://imgur.com/BGSunzy.png" alt="logged in homepage" /></p>
+
+<p>Navigate to the sweet article and make a payment from the Alice node (you can
+use either the command line or the web GUI). Clicking “Complete” will prompt the
+webserver to check that the payment has been complete, and you can now enjoy
+reading through this sweet article.</p>
+
+<h3 id="setting-up-grpc">Setting up gRPC</h3>
+
+<p>Let’s practice running some commands on gRPC. Open up a new terminal window then proceed as follows:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Enter the development environment</span>
+<span class="nb">cd </span>ln-workspace
+
+<span class="c"># Activate Python virtualenv</span>
+<span class="nb">source </span>deskenv/bin/activate
+
+<span class="c"># Clone the Google API repository, which is required due to the use of</span>
+<span class="c"># google/api/annotations.proto</span>
+git clone https://github.com/googleapis/googleapis.git
+
+<span class="c"># Download the lnd rpc.proto file</span>
+curl <span class="nt">-o</span> rpc.proto <span class="nt">-s</span> https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
+
+<span class="c"># Compile the proto file</span>
+python <span class="nt">-m</span> grpc_tools.protoc <span class="nt">--proto_path</span><span class="o">=</span>googleapis:. <span class="nt">--python_out</span><span class="o">=</span><span class="nb">.</span> <span class="nt">--grpc_python_out</span><span class="o">=</span><span class="nb">.</span> rpc.proto
+</code></pre></div></div>
+
+<p>We have now generated the two files <code class="highlighter-rouge">rpc_pb2.py</code> and <code class="highlighter-rouge">rpc_pb2_grpc.py</code>, which
+you’ll need to import into your Python code in order to use it with lnd. Let’s move it into the coindesk folder for easy access</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mv </span>rpc<span class="k">*</span> lightning-coindesk/coindesk
+</code></pre></div></div>
+
+<p>We will now try a few commands with the Python gRPC client from the command
+line.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Optionally install ipython for prettier command line output</span>
+pip <span class="nb">install </span>ipython
+
+<span class="c"># Open the Django shell. This is a standard Python shell that also allows access to Django objects.</span>
+<span class="nb">cd </span>lightning-coindesk
+python manage.py shell
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Import rpc files and grpc
+</span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">coindesk</span> <span class="kn">import</span> <span class="n">rpc_pb2</span> <span class="k">as</span> <span class="n">ln</span><span class="p">,</span> <span class="n">rpc_pb2_grpc</span> <span class="k">as</span> <span class="n">lnrpc</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">grpc</span><span class="p">,</span> <span class="n">os</span>
+
+<span class="c1"># Establish a secure connection with our RPC server. We will first have to
+# gather our cert. Lnd cert is at ~/.lnd/tls.cert on Linux and
+# ~/Library/Application Support/Lnd/tls.cert on Mac
+</span><span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">cert</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">'~/.lnd/tls.cert'</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_channel_credentials</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">secure_channel</span><span class="p">(</span><span class="s">'localhost:10009'</span><span class="p">,</span> <span class="n">creds</span><span class="p">)</span>
+<span class="c1"># Create a new 'stub' object that will allow us to interact with our "Bob" lnd node.
+</span><span class="n">In</span> <span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="n">stub</span> <span class="o">=</span> <span class="n">lnrpc</span><span class="o">.</span><span class="n">LightningStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+<span class="c1"># Make a call to the ListChannels API.
+</span><span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="n">listchannels_resp</span> <span class="o">=</span> <span class="n">stub</span><span class="o">.</span><span class="n">ListChannels</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">ListChannelsRequest</span><span class="p">())</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span>
+<span class="n">channels</span> <span class="p">{</span>
+  <span class="n">active</span><span class="p">:</span> <span class="n">true</span>
+  <span class="n">remote_pubkey</span><span class="p">:</span> <span class="s">"02244b8eff01be9f7b4ec1d73ab10fc36da48b01a685ac90ed09a63fe94ec08d0a"</span>
+  <span class="n">channel_point</span><span class="p">:</span> <span class="s">"2622b779a8acca471a738b0796cd62e4457b79b33265cbfa687aadccc329023a:0"</span>
+  <span class="n">chan_id</span><span class="p">:</span> <span class="mi">495879744192512</span>
+  <span class="n">capacity</span><span class="p">:</span> <span class="mi">1000000</span>
+  <span class="n">local_balance</span><span class="p">:</span> <span class="mi">21001</span>
+  <span class="n">remote_balance</span><span class="p">:</span> <span class="mi">970311</span>
+  <span class="n">commit_fee</span><span class="p">:</span> <span class="mi">8688</span>
+  <span class="n">commit_weight</span><span class="p">:</span> <span class="mi">724</span>
+  <span class="n">fee_per_kw</span><span class="p">:</span> <span class="mi">12000</span>
+  <span class="n">total_satoshis_received</span><span class="p">:</span> <span class="mi">21001</span>
+  <span class="n">num_updates</span><span class="p">:</span> <span class="mi">8</span>
+<span class="p">}</span>
+<span class="n">channels</span> <span class="p">{</span>
+  <span class="n">active</span><span class="p">:</span> <span class="n">true</span>
+  <span class="n">remote_pubkey</span><span class="p">:</span> <span class="s">"032eed260ef71110a02a5da44d82fef9628ffa51113a2d0b9524e7d3bff615a1cf"</span>
+  <span class="n">channel_point</span><span class="p">:</span> <span class="s">"028088c354b26c33cfd5a5b2d4cca27c6e3a73b6752b5beff6f67ce779af5656:1"</span>
+  <span class="n">chan_id</span><span class="p">:</span> <span class="mi">554153860464641</span>
+  <span class="n">capacity</span><span class="p">:</span> <span class="mi">800000</span>
+  <span class="n">local_balance</span><span class="p">:</span> <span class="mi">190000</span>
+  <span class="n">remote_balance</span><span class="p">:</span> <span class="mi">601312</span>
+  <span class="n">commit_fee</span><span class="p">:</span> <span class="mi">8688</span>
+  <span class="n">commit_weight</span><span class="p">:</span> <span class="mi">724</span>
+  <span class="n">fee_per_kw</span><span class="p">:</span> <span class="mi">12000</span>
+  <span class="n">total_satoshis_sent</span><span class="p">:</span> <span class="mi">10000</span>
+  <span class="n">num_updates</span><span class="p">:</span> <span class="mi">2</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>What happened here? We constructed the request object for the list channels
+command with <code class="highlighter-rouge">ln.ListChannelsRequest()</code>, and passed it into the <code class="highlighter-rouge">ListChannels</code>
+function exposed by our stub.</p>
+
+<p>The response was saved into a <code class="highlighter-rouge">listchannels_resp</code> variable that holds all the
+information returned by the <code class="highlighter-rouge">listchannels</code> command. You can now access the
+individual properties of this object; for example, you can access the <code class="highlighter-rouge">chan_id</code>
+of Bob’s first channel with <code class="highlighter-rouge">listchannels_resp.channels[0].chan_id</code>.</p>
+
+<h3 id="playing-with-grpc">Playing with gRPC</h3>
+
+<p>To get a hang of the RPC documentation, try running a slightly more complex
+command like <code class="highlighter-rouge">GetChanInfo</code>, which requires passing in some parameters. The API
+docs are not yet complete, but you can refer to the <a href="https://github.com/lightningnetwork/lnd/blob/master/lnrpc/rpc.proto">RPC documentation in
+lnd</a>.</p>
+
+<p>Hint: look at the <code class="highlighter-rouge">GetChanInfo</code> object and the associated requests and
+responses.</p>
+
+<h3 id="moving-on-to-step-4">Moving on to Step 4</h3>
+
+<p>By now, you should have at least a basic understanding of how to work with lnd
+from a gRPC client.  In <a href="/tutorial/04-webapp-integration">Stage 4</a>, we will
+finally integrate <code class="highlighter-rouge">lnd</code> into our news site.</p>
+
+<h4 id="navigation">Navigation</h4>
+<ul>
+  <li><a href="/tutorial/04-webapp-integration">Proceed to Stage 4 - Webapp Integration</a></li>
+  <li><a href="/tutorial/02-web-client">Return to Stage 2 - Web Client</a></li>
+  <li><a href="/tutorial/">Return to main tutorial page</a></li>
+</ul>
+
+<h3 id="questions">Questions</h3>
+<ul>
+  <li>Join the #dev-help channel on our <a href="https://join.slack.com/t/lightningcommunity/shared_invite/enQtMzQ0OTQyNjE5NjU1LWRiMGNmOTZiNzU0MTVmYzc1ZGFkZTUyNzUwOGJjMjYwNWRkNWQzZWE3MTkwZjdjZGE5ZGNiNGVkMzI2MDU4ZTE">Community
+Slack</a></li>
+  <li>Join IRC:
+<a href="https://webchat.freenode.net/?channels=lnd"><img src="https://img.shields.io/badge/chat-on%20freenode-brightgreen.svg" alt="Irc" /></a></li>
+</ul>
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Lightning Network Developers</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Max Fang
+            
+            </li>
+            
+            <li>
+              <a href="mailto:max@lightning.engineering">
+                <span>max@lightning.engineering</span>
+              </a>
+            </li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/lightningnetwork/lnd"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">lnd</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/lightning"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">lightning</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Developer resources and documentation for the Lightning Network Daemon.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

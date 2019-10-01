@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Installation</title>
+  <meta name="description" content="Developer resources and documentation for the Lightning Network Daemon.">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="/assets/dropdown.css">
+  <link rel="canonical" href="http://0.0.0.0:4000/guides/installation/">
+  <link rel="alternate" type="application/rss+xml" title="Lightning Network Developers" href="/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <a class="site-title" href="/">Lightning Network Developers</a>
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          <div class="dropdown">
+            <a class="page-link" href="/guides"><button class="dropbtn">Guides</button></a>
+            <div class="dropdown-content">
+              <a href="/overview/">Overview</a>
+              <a href="/guides/installation/">Installation</a>
+              <a href="/tutorial/">Tutorial</a>
+              <a href="/guides/python-grpc/">Python</a>
+              <a href="/guides/javascript-grpc/">Javascript</a>
+              <a href="/guides/docker/">Docker</a>
+            </div>
+          </div>
+          <a class="page-link" href="//api.lightning.community">API</a>
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Installation</h1>
+  </header>
+
+  <div class="post-content">
+    <ul>
+  <li><a href="#installation">Installation</a>
+    <ul>
+      <li><a href="#preliminaries">Preliminaries</a></li>
+      <li><a href="#installing-lnd">Installing lnd</a></li>
+    </ul>
+  </li>
+  <li><a href="#available-backend-operating-modes">Available Backend Operating Modes</a>
+    <ul>
+      <li><a href="#btcd-options">btcd Options</a></li>
+      <li><a href="#neutrino-options">Neutrino Options</a></li>
+      <li><a href="#bitcoind-options">Bitcoind Options</a></li>
+      <li><a href="#using-btcd">Using btcd</a>
+        <ul>
+          <li><a href="#installing-btcd">Installing btcd</a></li>
+          <li><a href="#starting-btcd">Starting btcd</a></li>
+          <li><a href="#running-lnd-using-the-btcd-backend">Running lnd using the btcd backend</a></li>
+        </ul>
+      </li>
+      <li><a href="#using-neutrino">Using Neutrino</a></li>
+      <li><a href="#using-bitcoind-or-litecoind">Using bitcoind or litecoind</a></li>
+    </ul>
+  </li>
+  <li><a href="#creating-a-wallet">Creating a Wallet</a></li>
+  <li><a href="#macaroons">Macaroons</a></li>
+  <li><a href="#network-reachability">Network Reachability</a></li>
+  <li><a href="#simnet-vs-testnet-development">Simnet vs. Testnet Development</a></li>
+  <li><a href="#creating-an-lndconf-optional">Creating an lnd.conf (Optional)</a></li>
+</ul>
+
+<h1 id="installation">Installation</h1>
+
+<h3 id="preliminaries">Preliminaries</h3>
+<p>In order to work with <a href="https://github.com/lightningnetwork/lnd"><code class="highlighter-rouge">lnd</code></a>, the
+  following build dependencies are required:</p>
+
+<ul>
+  <li>
+    <p><strong>Go:</strong> <code class="highlighter-rouge">lnd</code> is written in Go. To install, run one of the following commands:</p>
+
+    <p><strong>Note</strong>: The minimum version of Go supported is Go 1.13. We recommend that
+users use the latest version of Go, which at the time of writing is
+<a href="https://blog.golang.org/go1.13"><code class="highlighter-rouge">1.13</code></a>.</p>
+
+    <p>On Linux:</p>
+
+    <p>(x86-64)</p>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
+sha256sum go1.13.linux-amd64.tar.gz | awk -F " " '{ print $1 }'
+</code></pre></div>    </div>
+
+    <p>The final output of the command above should be
+<code class="highlighter-rouge">68a2297eb099d1a76097905a2ce334e3155004ec08cdea85f24527be3c48e856</code>. If it
+isn’t, then the target REPO HAS BEEN MODIFIED, and you shouldn’t install
+this version of Go. If it matches, then proceed to install Go:</p>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tar -C /usr/local -xzf go1.13.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+</code></pre></div>    </div>
+
+    <p>(ARMv6)</p>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://dl.google.com/go/go1.13.linux-armv6l.tar.gz
+sha256sum go1.13.linux-armv6l.tar.gz | awk -F " " '{ print $1 }'
+</code></pre></div>    </div>
+
+    <p>The final output of the command above should be
+<code class="highlighter-rouge">931906d67cae1222f501e7be26e0ee73ba89420be0c4591925901cb9a4e156f0</code>. If it
+isn’t, then the target REPO HAS BEEN MODIFIED, and you shouldn’t install
+this version of Go. If it matches, then proceed to install Go:</p>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tar -C /usr/local -xzf go1.13.linux-armv6l.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+</code></pre></div>    </div>
+
+    <p>On Mac OS X:</p>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew install go@1.13
+</code></pre></div>    </div>
+
+    <p>On FreeBSD:</p>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pkg install go
+</code></pre></div>    </div>
+
+    <p>Alternatively, one can download the pre-compiled binaries hosted on the
+<a href="https://golang.org/dl/">Golang download page</a>. If one seeks to install
+from source, then more detailed installation instructions can be found
+<a href="https://golang.org/doc/install">here</a>.</p>
+
+    <p>At this point, you should set your <code class="highlighter-rouge">$GOPATH</code> environment variable, which
+represents the path to your workspace. By default, <code class="highlighter-rouge">$GOPATH</code> is set to
+<code class="highlighter-rouge">~/go</code>. You will also need to add <code class="highlighter-rouge">$GOPATH/bin</code> to your <code class="highlighter-rouge">PATH</code>. This ensures
+that your shell will be able to detect the binaries you install.</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">GOPATH</span><span class="o">=</span>~/gocode
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$GOPATH</span>/bin
+</code></pre></div>    </div>
+
+    <p>We recommend placing the above in your .bashrc or in a setup script so that
+you can avoid typing this every time you open a new terminal window.</p>
+  </li>
+  <li>
+    <p><strong>Go modules:</strong> This project uses <a href="https://github.com/golang/go/wiki/Modules">Go modules</a> 
+to manage dependencies as well as to provide <em>reproducible builds</em>.</p>
+
+    <p>Usage of Go modules (with Go 1.12) means that you no longer need to clone
+<code class="highlighter-rouge">lnd</code> into your <code class="highlighter-rouge">$GOPATH</code> for development purposes. Instead, your <code class="highlighter-rouge">lnd</code>
+repo can now live anywhere!</p>
+  </li>
+</ul>
+
+<h3 id="installing-lnd">Installing lnd</h3>
+
+<p>With the preliminary steps completed, to install <code class="highlighter-rouge">lnd</code>, <code class="highlighter-rouge">lncli</code>, and all
+related dependencies run the following commands:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go get -d github.com/lightningnetwork/lnd
+cd $GOPATH/src/github.com/lightningnetwork/lnd
+make &amp;&amp; make install
+</code></pre></div></div>
+
+<p><strong>NOTE</strong>: Our instructions still use the <code class="highlighter-rouge">$GOPATH</code> directory from prior
+versions of Go, but with Go 1.12, it’s now possible for <code class="highlighter-rouge">lnd</code> to live
+<em>anywhere</em> on your file system.</p>
+
+<p>For Windows WSL users, make will need to be referenced directly via
+/usr/bin/make/, or alternatively by wrapping quotation marks around make,
+like so:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/usr/bin/make &amp;&amp; /usr/bin/make install
+
+"make" &amp;&amp; "make" install
+</code></pre></div></div>
+
+<p>On FreeBSD, use gmake instead of make.</p>
+
+<p>Alternatively, if one doesn’t wish to use <code class="highlighter-rouge">make</code>, then the <code class="highlighter-rouge">go</code> commands can be
+used directly:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GO111MODULE=on go install -v ./...
+</code></pre></div></div>
+
+<p><strong>Updating</strong></p>
+
+<p>To update your version of <code class="highlighter-rouge">lnd</code> to the latest version run the following
+commands:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd $GOPATH/src/github.com/lightningnetwork/lnd
+git pull
+make clean &amp;&amp; make &amp;&amp; make install
+</code></pre></div></div>
+
+<p>On FreeBSD, use gmake instead of make.</p>
+
+<p>Alternatively, if one doesn’t wish to use <code class="highlighter-rouge">make</code>, then the <code class="highlighter-rouge">go</code> commands can be
+used directly:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd $GOPATH/src/github.com/lightningnetwork/lnd
+git pull
+GO111MODULE=on go install -v ./...
+</code></pre></div></div>
+
+<p><strong>Tests</strong></p>
+
+<p>To check that <code class="highlighter-rouge">lnd</code> was installed properly run the following command:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make check
+</code></pre></div></div>
+
+<h1 id="available-backend-operating-modes">Available Backend Operating Modes</h1>
+
+<p>In order to run, <code class="highlighter-rouge">lnd</code> requires, that the user specify a chain backend. At the
+time of writing of this document, there are three available chain backends:
+<code class="highlighter-rouge">btcd</code>, <code class="highlighter-rouge">neutrino</code>, <code class="highlighter-rouge">bitcoind</code>. All but neutrino (atm) can run on mainnet with
+an out of the box <code class="highlighter-rouge">lnd</code> instance. We don’t require <code class="highlighter-rouge">--txindex</code> when running
+with <code class="highlighter-rouge">bitcoind</code> or <code class="highlighter-rouge">btcd</code> but activating the <code class="highlighter-rouge">txindex</code> will generally make
+<code class="highlighter-rouge">lnd</code> run faster.</p>
+
+<p><strong>NOTE: WE DO NOT FULLY SUPPORT PRUNED OPERATING MODES FOR FULL NODES.</strong> It’s
+possible to run a node in a pruned mode and have it serve lnd, however one must
+take care to ensure that <code class="highlighter-rouge">lnd</code> has all blocks on disk since the birth of the
+wallet, and the age of the earliest channels (which were created around March
+2018).</p>
+
+<p>The set of arguments for each of the backend modes is as follows:</p>
+
+<h2 id="btcd-options">btcd Options</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcd:
+      --btcd.dir=                                             The base directory that contains the node's data, logs, configuration file, etc. (default: /Users/roasbeef/Library/Application Support/Btcd)
+      --btcd.rpchost=                                         The daemon's rpc listening address. If a port is omitted, then the default port for the selected chain parameters will be used. (default: localhost)
+      --btcd.rpcuser=                                         Username for RPC connections
+      --btcd.rpcpass=                                         Password for RPC connections
+      --btcd.rpccert=                                         File containing the daemon's certificate file (default: /Users/roasbeef/Library/Application Support/Btcd/rpc.cert)
+      --btcd.rawrpccert=                                      The raw bytes of the daemon's PEM-encoded certificate chain which will be used to authenticate the RPC connection.
+</code></pre></div></div>
+
+<h2 id="neutrino-options">Neutrino Options</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>neutrino:
+  -a, --neutrino.addpeer=                                     Add a peer to connect with at startup
+      --neutrino.connect=                                     Connect only to the specified peers at startup
+      --neutrino.maxpeers=                                    Max number of inbound and outbound peers
+      --neutrino.banduration=                                 How long to ban misbehaving peers.  Valid time units are {s, m, h}.  Minimum 1 second
+      --neutrino.banthreshold=                                Maximum allowed ban score before disconnecting and banning misbehaving peers.
+</code></pre></div></div>
+
+<h2 id="bitcoind-options">Bitcoind Options</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bitcoind:
+      --bitcoind.dir=                                         The base directory that contains the node's data, logs, configuration file, etc. (default: /Users/roasbeef/Library/Application Support/Bitcoin)
+      --bitcoind.rpchost=                                     The daemon's rpc listening address. If a port is omitted, then the default port for the selected chain parameters will be used. (default: localhost)
+      --bitcoind.rpcuser=                                     Username for RPC connections
+      --bitcoind.rpcpass=                                     Password for RPC connections
+      --bitcoind.zmqpubrawblock=                              The address listening for ZMQ connections to deliver raw block notifications
+      --bitcoind.zmqpubrawtx=                                 The address listening for ZMQ connections to deliver raw transaction notifications
+</code></pre></div></div>
+
+<h2 id="using-btcd">Using btcd</h2>
+
+<h3 id="installing-btcd">Installing btcd</h3>
+
+<p>On FreeBSD, use gmake instead of make.</p>
+
+<p>To install btcd, run the following commands:</p>
+
+<p>Install <strong>btcd</strong>:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make btcd
+</code></pre></div></div>
+
+<p>Alternatively, you can install <a href="https://github.com/btcsuite/btcd"><code class="highlighter-rouge">btcd</code> directly from its
+repo</a>.</p>
+
+<h3 id="starting-btcd">Starting btcd</h3>
+
+<p>Running the following command will create <code class="highlighter-rouge">rpc.cert</code> and default <code class="highlighter-rouge">btcd.conf</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcd --testnet --rpcuser=REPLACEME --rpcpass=REPLACEME
+</code></pre></div></div>
+<p>If you want to use <code class="highlighter-rouge">lnd</code> on testnet, <code class="highlighter-rouge">btcd</code> needs to first fully sync the
+testnet blockchain. Depending on your hardware, this may take up to a few
+hours. Note that adding <code class="highlighter-rouge">--txindex</code> is optional, as it will take longer to sync
+the node, but then <code class="highlighter-rouge">lnd</code> will generally operate faster as it can hit the index
+directly, rather than scanning blocks or BIP 158 filters for relevant items.</p>
+
+<p>(NOTE: It may take several minutes to find segwit-enabled peers.)</p>
+
+<p>While <code class="highlighter-rouge">btcd</code> is syncing you can check on its progress using btcd’s <code class="highlighter-rouge">getinfo</code>
+RPC command:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcctl --testnet --rpcuser=REPLACEME --rpcpass=REPLACEME getinfo
+{
+  "version": 120000,
+  "protocolversion": 70002,
+  "blocks": 1114996,
+  "timeoffset": 0,
+  "connections": 7,
+  "proxy": "",
+  "difficulty": 422570.58270815,
+  "testnet": true,
+  "relayfee": 0.00001,
+  "errors": ""
+}
+</code></pre></div></div>
+
+<p>Additionally, you can monitor btcd’s logs to track its syncing progress in real
+time.</p>
+
+<p>You can test your <code class="highlighter-rouge">btcd</code> node’s connectivity using the <code class="highlighter-rouge">getpeerinfo</code> command:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcctl --testnet --rpcuser=REPLACEME --rpcpass=REPLACEME getpeerinfo | more
+</code></pre></div></div>
+
+<h3 id="running-lnd-using-the-btcd-backend">Running lnd using the btcd backend</h3>
+
+<p>If you are on testnet, run this command after <code class="highlighter-rouge">btcd</code> has finished syncing.
+Otherwise, replace <code class="highlighter-rouge">--bitcoin.testnet</code> with <code class="highlighter-rouge">--bitcoin.simnet</code>. If you are
+installing <code class="highlighter-rouge">lnd</code> in preparation for the
+<a href="https://dev.lightning.community/tutorial">tutorial</a>, you may skip this step.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lnd --bitcoin.active --bitcoin.testnet --debuglevel=debug --btcd.rpcuser=kek --btcd.rpcpass=kek --externalip=X.X.X.X
+</code></pre></div></div>
+
+<h2 id="using-neutrino">Using Neutrino</h2>
+
+<p>In order to run <code class="highlighter-rouge">lnd</code> in its light client mode, you’ll need to locate a
+full-node which is capable of serving this new light client mode. <code class="highlighter-rouge">lnd</code> uses
+<a href="https://github.com/bitcoin/bips/blob/master/bip-0157.mediawiki">BIP 157</a> and <a href="https://github.com/bitcoin/bips/blob/master/bip-0158.mediawiki">BIP
+158</a> for its light client
+mode.  A public instance of such a node can be found at
+<code class="highlighter-rouge">faucet.lightning.community</code>.</p>
+
+<p>To run lnd in neutrino mode, run <code class="highlighter-rouge">lnd</code> with the following arguments, (swapping
+in <code class="highlighter-rouge">--bitcoin.simnet</code> if needed), and also your own <code class="highlighter-rouge">btcd</code> node if available:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lnd --bitcoin.active --bitcoin.testnet --debuglevel=debug --bitcoin.node=neutrino --neutrino.connect=faucet.lightning.community
+</code></pre></div></div>
+
+<h2 id="using-bitcoind-or-litecoind">Using bitcoind or litecoind</h2>
+
+<p>The configuration for bitcoind and litecoind are nearly identical, the
+following steps can be mirrored with loss of generality to enable a litecoind
+backend.  Setup will be described in regards to <code class="highlighter-rouge">bitcoind</code>, but note that <code class="highlighter-rouge">lnd</code>
+uses a distinct <code class="highlighter-rouge">litecoin.node=litecoind</code> argument and analogous
+subconfigurations prefixed by <code class="highlighter-rouge">litecoind</code>. Note that adding <code class="highlighter-rouge">--txindex</code> is
+optional, as it will take longer to sync the node, but then <code class="highlighter-rouge">lnd</code> will
+generally operate faster as it can hit the index directly, rather than scanning
+blocks or BIP 158 filters for relevant items.</p>
+
+<p>To configure your bitcoind backend for use with lnd, first complete and verify
+the following:</p>
+
+<ul>
+  <li>Since <code class="highlighter-rouge">lnd</code> uses
+<a href="https://github.com/bitcoin/bitcoin/blob/master/doc/zmq.md">ZeroMQ</a> to
+interface with <code class="highlighter-rouge">bitcoind</code>, <em>your <code class="highlighter-rouge">bitcoind</code> installation must be compiled with
+ZMQ</em>. Note that if you installed <code class="highlighter-rouge">bitcoind</code> from source and ZMQ was not present, 
+then ZMQ support will be disabled, and <code class="highlighter-rouge">lnd</code> will quit on a <code class="highlighter-rouge">connection refused</code> error. 
+If you installed <code class="highlighter-rouge">bitcoind</code> via Homebrew in the past ZMQ may not be included 
+(<a href="https://github.com/Homebrew/homebrew-core/pull/23088">this has now been fixed</a> 
+in the latest Homebrew recipe for bitcoin)</li>
+  <li>Configure the <code class="highlighter-rouge">bitcoind</code> instance for ZMQ with <code class="highlighter-rouge">--zmqpubrawblock</code> and
+<code class="highlighter-rouge">--zmqpubrawtx</code>. These options must each use their own unique address in order
+to provide a reliable delivery of notifications (e.g.
+<code class="highlighter-rouge">--zmqpubrawblock=tcp://127.0.0.1:28332</code> and
+<code class="highlighter-rouge">--zmqpubrawtx=tcp://127.0.0.1:28333</code>).</li>
+  <li>Start <code class="highlighter-rouge">bitcoind</code> running against testnet, and let it complete a full sync with
+the testnet chain (alternatively, use <code class="highlighter-rouge">--bitcoind.regtest</code> instead).</li>
+</ul>
+
+<p>Here’s a sample <code class="highlighter-rouge">bitcoin.conf</code> for use with lnd:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>testnet=1
+server=1
+daemon=1
+zmqpubrawblock=tcp://127.0.0.1:28332
+zmqpubrawtx=tcp://127.0.0.1:28333
+</code></pre></div></div>
+
+<p>Once all of the above is complete, and you’ve confirmed <code class="highlighter-rouge">bitcoind</code> is fully
+updated with the latest blocks on testnet, run the command below to launch
+<code class="highlighter-rouge">lnd</code> with <code class="highlighter-rouge">bitcoind</code> as your backend (as with <code class="highlighter-rouge">bitcoind</code>, you can create an
+<code class="highlighter-rouge">lnd.conf</code> to save these options, more info on that is described further
+below):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lnd --bitcoin.active --bitcoin.testnet --debuglevel=debug --bitcoin.node=bitcoind --bitcoind.rpcuser=REPLACEME --bitcoind.rpcpass=REPLACEME --bitcoind.zmqpubrawblock=tcp://127.0.0.1:28332 --bitcoind.zmqpubrawtx=tcp://127.0.0.1:28333 --externalip=X.X.X.X
+</code></pre></div></div>
+
+<p><em>NOTE:</em></p>
+<ul>
+  <li>The auth parameters <code class="highlighter-rouge">rpcuser</code> and <code class="highlighter-rouge">rpcpass</code> parameters can typically be
+determined by <code class="highlighter-rouge">lnd</code> for a <code class="highlighter-rouge">bitcoind</code> instance running under the same user,
+including when using cookie auth. In this case, you can exclude them from the
+<code class="highlighter-rouge">lnd</code> options entirely.</li>
+  <li>If you DO choose to explicitly pass the auth parameters in your <code class="highlighter-rouge">lnd.conf</code> or
+command line options for <code class="highlighter-rouge">lnd</code> (<code class="highlighter-rouge">bitcoind.rpcuser</code> and <code class="highlighter-rouge">bitcoind.rpcpass</code> as
+shown in example command above), you must also specify the
+<code class="highlighter-rouge">bitcoind.zmqpubrawblock</code> and <code class="highlighter-rouge">bitcoind.zmqpubrawtx</code> options. Otherwise, <code class="highlighter-rouge">lnd</code>
+will attempt to get the configuration from your <code class="highlighter-rouge">bitcoin.conf</code>.</li>
+  <li>You must ensure the same addresses are used for the <code class="highlighter-rouge">bitcoind.zmqpubrawblock</code>
+and <code class="highlighter-rouge">bitcoind.zmqpubrawtx</code> options passed to <code class="highlighter-rouge">lnd</code> as for the <code class="highlighter-rouge">zmqpubrawblock</code>
+and <code class="highlighter-rouge">zmqpubrawtx</code> passed in the <code class="highlighter-rouge">bitcoind</code> options respectively.</li>
+  <li>When running lnd and bitcoind on the same Windows machine, ensure you use
+127.0.0.1, not localhost, for all configuration options that require a TCP/IP
+host address.  If you use “localhost” as the host name, you may see extremely
+slow inter-process-communication between lnd and the bitcoind backend.  If lnd
+is experiencing this issue, you’ll see “Waiting for chain backend to finish
+sync, start_height=XXXXXX” as the last entry in the console or log output, and
+lnd will appear to hang.  Normal lnd output will quickly show multiple
+messages like this as lnd consumes blocks from bitcoind.</li>
+  <li>Don’t connect more than two or three instances of <code class="highlighter-rouge">lnd</code> to <code class="highlighter-rouge">bitcoind</code>. With
+the default <code class="highlighter-rouge">bitcoind</code> settings, having more than one instance of <code class="highlighter-rouge">lnd</code>, or
+<code class="highlighter-rouge">lnd</code> plus any application that consumes the RPC could cause <code class="highlighter-rouge">lnd</code> to miss
+crucial updates from the backend.</li>
+</ul>
+
+<h1 id="creating-a-wallet">Creating a wallet</h1>
+<p>If <code class="highlighter-rouge">lnd</code> is being run for the first time, create a new wallet with:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli create
+</code></pre></div></div>
+<p>This will prompt for a wallet password, and optionally a cipher seed
+passphrase.</p>
+
+<p><code class="highlighter-rouge">lnd</code> will then print a 24 word cipher seed mnemonic, which can be used to
+recover the wallet in case of data loss. The user should write this down and
+keep in a safe place.</p>
+
+<h1 id="macaroons">Macaroons</h1>
+
+<p><code class="highlighter-rouge">lnd</code>’s authentication system is called <strong>macaroons</strong>, which are decentralized
+bearer credentials allowing for delegation, attenuation, and other cool
+features. You can learn more about them in Alex Akselrod’s <a href="https://github.com/lightningnetwork/lnd/issues/20">writeup on
+Github</a>.</p>
+
+<p>Running <code class="highlighter-rouge">lnd</code> for the first time will by default generate the <code class="highlighter-rouge">admin.macaroon</code>,
+<code class="highlighter-rouge">read_only.macaroon</code>, and <code class="highlighter-rouge">macaroons.db</code> files that are used to authenticate
+into <code class="highlighter-rouge">lnd</code>. They will be stored in the network directory (default:
+<code class="highlighter-rouge">lnddir/data/chain/bitcoin/mainnet</code>) so that it’s possible to use a distinct
+password for mainnet, testnet, simnet, etc. Note that if you specified an
+alternative data directory (via the <code class="highlighter-rouge">--datadir</code> argument), you will have to
+additionally pass the updated location of the <code class="highlighter-rouge">admin.macaroon</code> file into <code class="highlighter-rouge">lncli</code>
+using the <code class="highlighter-rouge">--macaroonpath</code> argument.</p>
+
+<p>To disable macaroons for testing, pass the <code class="highlighter-rouge">--no-macaroons</code> flag into <em>both</em>
+<code class="highlighter-rouge">lnd</code> and <code class="highlighter-rouge">lncli</code>.</p>
+
+<h1 id="network-reachability">Network Reachability</h1>
+
+<p>If you’d like to signal to other nodes on the network that you’ll accept
+incoming channels (as peers need to connect inbound to initiate a channel
+funding workflow), then the <code class="highlighter-rouge">--externalip</code> flag should be set to your publicly
+reachable IP address.</p>
+
+<h1 id="simnet-vs-testnet-development">Simnet vs. Testnet Development</h1>
+
+<p>If you are doing local development, such as for the tutorial, you’ll want to
+start both <code class="highlighter-rouge">btcd</code> and <code class="highlighter-rouge">lnd</code> in the <code class="highlighter-rouge">simnet</code> mode. Simnet is similar to regtest
+in that you’ll be able to instantly mine blocks as needed to test <code class="highlighter-rouge">lnd</code>
+locally. In order to start either daemon in the <code class="highlighter-rouge">simnet</code> mode use <code class="highlighter-rouge">simnet</code>
+instead of <code class="highlighter-rouge">testnet</code>, adding the <code class="highlighter-rouge">--bitcoin.simnet</code> flag instead of the
+<code class="highlighter-rouge">--bitcoin.testnet</code> flag.</p>
+
+<p>Another relevant command line flag for local testing of new <code class="highlighter-rouge">lnd</code> developments
+is the <code class="highlighter-rouge">--debughtlc</code> flag. When starting <code class="highlighter-rouge">lnd</code> with this flag, it’ll be able to
+automatically settle a special type of HTLC sent to it. This means that you
+won’t need to manually insert invoices in order to test payment connectivity.
+To send this “special” HTLC type, include the <code class="highlighter-rouge">--debugsend</code> command at the end
+of your <code class="highlighter-rouge">sendpayment</code> commands.</p>
+
+<p>There are currently two primary ways to run <code class="highlighter-rouge">lnd</code>: one requires a local <code class="highlighter-rouge">btcd</code>
+instance with the RPC service exposed, and the other uses a fully integrated
+light client powered by <a href="https://github.com/lightninglabs/neutrino">neutrino</a>.</p>
+
+<h1 id="creating-an-lndconf-optional">Creating an lnd.conf (Optional)</h1>
+
+<p>Optionally, if you’d like to have a persistent configuration between <code class="highlighter-rouge">lnd</code>
+launches, allowing you to simply type <code class="highlighter-rouge">lnd --bitcoin.testnet --bitcoin.active</code>
+at the command line, you can create an <code class="highlighter-rouge">lnd.conf</code>.</p>
+
+<p><strong>On MacOS, located at:</strong>
+<code class="highlighter-rouge">/Users/[username]/Library/Application Support/Lnd/lnd.conf</code></p>
+
+<p><strong>On Linux, located at:</strong>
+<code class="highlighter-rouge">~/.lnd/lnd.conf</code></p>
+
+<p>Here’s a sample <code class="highlighter-rouge">lnd.conf</code> for <code class="highlighter-rouge">btcd</code> to get you started:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Application Options]
+debuglevel=trace
+maxpendingchannels=10
+
+[Bitcoin]
+bitcoin.active=1
+</code></pre></div></div>
+
+<p>Notice the <code class="highlighter-rouge">[Bitcoin]</code> section. This section houses the parameters for the
+Bitcoin chain. <code class="highlighter-rouge">lnd</code> also supports Litecoin testnet4 (but not both BTC and LTC
+at the same time), so when working with Litecoin be sure to set to parameters
+for Litecoin accordingly. See a more detailed sample config file available
+<a href="https://github.com/lightningnetwork/lnd/blob/master/sample-lnd.conf">here</a>
+and explore the other sections for node configuration, including <code class="highlighter-rouge">[Btcd]</code>,
+<code class="highlighter-rouge">[Bitcoind]</code>, <code class="highlighter-rouge">[Neutrino]</code>, <code class="highlighter-rouge">[Ltcd]</code>, and <code class="highlighter-rouge">[Litecoind]</code> depending on which
+chain and node type you’re using.</p>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<ul>
+  <li><strong><a href="/tutorial/">Tutorial</a>:</strong> Get acquainted with the skills necessary for <code class="highlighter-rouge">lnd</code> development.</li>
+  <li><strong><a href="/guides/">Developer Guides</a>:</strong> Look through developer manuals on gRPC,
+Docker, and more.</li>
+  <li><strong><a href="/resources/">Resources</a>:</strong> Learn about the Lightning Network</li>
+  <li><strong><a href="/contribute/">Code Contribution Guidelines</a>:</strong> Contribute to <code class="highlighter-rouge">lnd</code> itself.</li>
+</ul>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Lightning Network Developers</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Max Fang
+            
+            </li>
+            
+            <li>
+              <a href="mailto:max@lightning.engineering">
+                <span>max@lightning.engineering</span>
+              </a>
+            </li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/lightningnetwork/lnd"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">lnd</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/lightning"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">lightning</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Developer resources and documentation for the Lightning Network Daemon.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

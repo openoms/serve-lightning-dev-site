@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Working with LND and Docker</title>
+  <meta name="description" content="Developer resources and documentation for the Lightning Network Daemon.">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="/assets/dropdown.css">
+  <link rel="canonical" href="http://0.0.0.0:4000/guides/docker/">
+  <link rel="alternate" type="application/rss+xml" title="Lightning Network Developers" href="/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <a class="site-title" href="/">Lightning Network Developers</a>
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          <div class="dropdown">
+            <a class="page-link" href="/guides"><button class="dropbtn">Guides</button></a>
+            <div class="dropdown-content">
+              <a href="/overview/">Overview</a>
+              <a href="/guides/installation/">Installation</a>
+              <a href="/tutorial/">Tutorial</a>
+              <a href="/guides/python-grpc/">Python</a>
+              <a href="/guides/javascript-grpc/">Javascript</a>
+              <a href="/guides/docker/">Docker</a>
+            </div>
+          </div>
+          <a class="page-link" href="//api.lightning.community">API</a>
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Working with LND and Docker</h1>
+  </header>
+
+  <div class="post-content">
+    <p>This document is written for people who are eager to do something with 
+the Lightning Network Daemon (<code class="highlighter-rouge">lnd</code>). This folder uses <code class="highlighter-rouge">docker-compose</code> to
+package <code class="highlighter-rouge">lnd</code> and <code class="highlighter-rouge">btcd</code> together to make deploying the two daemons as easy as
+typing a few commands. All configuration between <code class="highlighter-rouge">lnd</code> and <code class="highlighter-rouge">btcd</code> are handled
+automatically by their <code class="highlighter-rouge">docker-compose</code> config file.</p>
+
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Name  | Version 
+——–|———
+docker-compose | 1.9.0
+docker | 1.13.0</p>
+
+<h3 id="table-of-content">Table of content</h3>
+<ul>
+  <li><a href="#create-lightning-network-cluster">Create lightning network cluster</a></li>
+  <li><a href="#connect-to-faucet-lightning-node">Connect to faucet lightning node</a></li>
+  <li><a href="#questions">Questions</a></li>
+</ul>
+
+<h3 id="create-lightning-network-cluster">Create lightning network cluster</h3>
+<p>This section describes a workflow on <code class="highlighter-rouge">simnet</code>, a development/test network
+that’s similar to Bitcoin Core’s <code class="highlighter-rouge">regtest</code> mode. In <code class="highlighter-rouge">simnet</code> mode blocks can be
+generated at will, as the difficulty is very low. This makes it an ideal
+environment for testing as one doesn’t need to wait tens of minutes for blocks
+to arrive in order to test channel related functionality. Additionally, it’s
+possible to spin up an arbitrary number of <code class="highlighter-rouge">lnd</code> instances within containers to
+create a mini development cluster. All state is saved between instances using a
+shared value.</p>
+
+<p>Current workflow is big because we recreate the whole network by ourselves,
+next versions will use the started <code class="highlighter-rouge">btcd</code> bitcoin node in <code class="highlighter-rouge">testnet</code> and
+<code class="highlighter-rouge">faucet</code> wallet from which you will get the bitcoins.</p>
+
+<p>In the workflow below, we describe the steps required to recreate the following
+topology, and send a payment from <code class="highlighter-rouge">Alice</code> to <code class="highlighter-rouge">Bob</code>.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+ ----- +                   + --- +
+| Alice | &lt;--- channel ---&gt; | Bob |  &lt;---   Bob and Alice are the lightning network daemons which 
++ ----- +                   + --- +         create channels and interact with each other using the   
+    |                          |            Bitcoin network as source of truth. 
+    |                          |            
+    + - - - -  - + - - - - - - +            
+                 |
+        + --------------- +
+        | Bitcoin network |  &lt;---  In the current scenario for simplicity we create only one  
+        + --------------- +        "btcd" node which represents the Bitcoin network, in a 
+                                    real situation Alice and Bob will likely be 
+                                    connected to different Bitcoin nodes.
+</code></pre></div></div>
+
+<p><strong>General workflow is the following:</strong></p>
+
+<ul>
+  <li>Create a <code class="highlighter-rouge">btcd</code> node running on a private <code class="highlighter-rouge">simnet</code>.</li>
+  <li>Create <code class="highlighter-rouge">Alice</code>, one of the <code class="highlighter-rouge">lnd</code> nodes in our simulation network.</li>
+  <li>Create <code class="highlighter-rouge">Bob</code>, the other <code class="highlighter-rouge">lnd</code> node in our simulation network.</li>
+  <li>Mine some blocks to send <code class="highlighter-rouge">Alice</code> some bitcoins.</li>
+  <li>Open channel between <code class="highlighter-rouge">Alice</code> and <code class="highlighter-rouge">Bob</code>.</li>
+  <li>Send payment from <code class="highlighter-rouge">Alice</code> to <code class="highlighter-rouge">Bob</code>.</li>
+  <li>Close the channel between <code class="highlighter-rouge">Alice</code> and <code class="highlighter-rouge">Bob</code>.</li>
+  <li>Check that on-chain <code class="highlighter-rouge">Bob</code> balance was changed.</li>
+</ul>
+
+<p>Start <code class="highlighter-rouge">btcd</code>, and then create an address for <code class="highlighter-rouge">Alice</code> that we’ll directly mine
+bitcoin into.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Init bitcoin network env variable:</span>
+<span class="nv">$ </span><span class="nb">export </span><span class="nv">NETWORK</span><span class="o">=</span><span class="s2">"simnet"</span> 
+
+<span class="c"># Run the "Alice" container and log into it:</span>
+<span class="nv">$ </span>docker-compose run <span class="nt">-d</span> <span class="nt">--name</span> alice lnd_btc
+<span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-i</span> <span class="nt">-t</span> alice bash
+
+<span class="c"># Generate a new backward compatible nested p2sh address for Alice:</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet newaddress np2wkh 
+
+<span class="c"># Recreate "btcd" node and set Alice's address as mining address:</span>
+<span class="nv">$ MINING_ADDRESS</span><span class="o">=</span>&lt;alice_address&gt; docker-compose up <span class="nt">-d</span> btcd
+
+<span class="c"># Generate 400 blocks (we need at least "100 &gt;=" blocks because of coinbase </span>
+<span class="c"># block maturity and "300 ~=" in order to activate segwit):</span>
+<span class="nv">$ </span>docker-compose run btcctl generate 400
+
+<span class="c"># Check that segwit is active:</span>
+<span class="nv">$ </span>docker-compose run btcctl getblockchaininfo | <span class="nb">grep</span> <span class="nt">-A</span> 1 segwit
+</code></pre></div></div>
+
+<p>Check <code class="highlighter-rouge">Alice</code> balance:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice$ lncli --network=simnet walletbalance
+</code></pre></div></div>
+
+<p>Connect <code class="highlighter-rouge">Bob</code> node to <code class="highlighter-rouge">Alice</code> node.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Run "Bob" node and log into it:</span>
+<span class="nv">$ </span>docker-compose run <span class="nt">-d</span> <span class="nt">--name</span> bob lnd_btc
+<span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-i</span> <span class="nt">-t</span> bob bash
+
+<span class="c"># Get the identity pubkey of "Bob" node:</span>
+bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet getinfo
+
+<span class="o">{</span>
+    <span class="nt">-----</span><span class="o">&gt;</span><span class="s2">"identity_pubkey"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
+    <span class="s2">"alias"</span>: <span class="s2">""</span>,
+    <span class="s2">"num_pending_channels"</span>: 0,
+    <span class="s2">"num_active_channels"</span>: 0,
+    <span class="s2">"num_inactive_channels"</span>: 0,
+    <span class="s2">"num_peers"</span>: 0,
+    <span class="s2">"block_height"</span>: 1215,
+    <span class="s2">"block_hash"</span>: <span class="s2">"7d0bc86ea4151ed3b5be908ea883d2ac3073263537bcf8ca2dca4bec22e79d50"</span>,
+    <span class="s2">"synced_to_chain"</span>: <span class="nb">true</span>,
+    <span class="s2">"testnet"</span>: <span class="nb">false</span>
+    <span class="s2">"chains"</span>: <span class="o">[</span>
+        <span class="s2">"bitcoin"</span>
+    <span class="o">]</span>
+<span class="o">}</span>
+
+<span class="c"># Get the IP address of "Bob" node:</span>
+<span class="nv">$ </span>docker inspect bob | <span class="nb">grep </span>IPAddress
+
+<span class="c"># Connect "Alice" to the "Bob" node:</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet connect &lt;bob_pubkey&gt;@&lt;bob_host&gt;
+
+<span class="c"># Check list of peers on "Alice" side:</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listpeers
+<span class="o">{</span>
+    <span class="s2">"peers"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+            <span class="s2">"pub_key"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
+            <span class="s2">"address"</span>: <span class="s2">"172.19.0.4:9735"</span>,
+            <span class="s2">"bytes_sent"</span>: <span class="s2">"357"</span>,
+            <span class="s2">"bytes_recv"</span>: <span class="s2">"357"</span>,
+            <span class="s2">"sat_sent"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"sat_recv"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"inbound"</span>: <span class="nb">true</span>,
+            <span class="s2">"ping_time"</span>: <span class="s2">"0"</span>
+        <span class="o">}</span>
+    <span class="o">]</span>
+<span class="o">}</span>
+
+<span class="c"># Check list of peers on "Bob" side:</span>
+bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listpeers
+<span class="o">{</span>
+    <span class="s2">"peers"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+            <span class="s2">"pub_key"</span>: <span class="s2">"03d0cd35b761f789983f3cfe82c68170cd1c3266b39220c24f7dd72ef4be0883eb"</span>,
+            <span class="s2">"address"</span>: <span class="s2">"172.19.0.3:51932"</span>,
+            <span class="s2">"bytes_sent"</span>: <span class="s2">"357"</span>,
+            <span class="s2">"bytes_recv"</span>: <span class="s2">"357"</span>,
+            <span class="s2">"sat_sent"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"sat_recv"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"inbound"</span>: <span class="nb">false</span>,
+            <span class="s2">"ping_time"</span>: <span class="s2">"0"</span>
+        <span class="o">}</span>
+    <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Create the <code class="highlighter-rouge">Alice&lt;-&gt;Bob</code> channel.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Open the channel with "Bob":</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet openchannel <span class="nt">--node_key</span><span class="o">=</span>&lt;bob_identity_pubkey&gt; <span class="nt">--local_amt</span><span class="o">=</span>1000000
+
+<span class="c"># Include funding transaction in block thereby opening the channel:</span>
+<span class="nv">$ </span>docker-compose run btcctl generate 3
+
+<span class="c"># Check that channel with "Bob" was opened:</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listchannels
+<span class="o">{</span>
+    <span class="s2">"channels"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+            <span class="s2">"active"</span>: <span class="nb">true</span>,
+            <span class="s2">"remote_pubkey"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
+            <span class="s2">"channel_point"</span>: <span class="s2">"3511ae8a52c97d957eaf65f828504e68d0991f0276adff94c6ba91c7f6cd4275:0"</span>,
+            <span class="s2">"chan_id"</span>: <span class="s2">"1337006139441152"</span>,
+            <span class="s2">"capacity"</span>: <span class="s2">"1005000"</span>,
+            <span class="s2">"local_balance"</span>: <span class="s2">"1000000"</span>,
+            <span class="s2">"remote_balance"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"commit_fee"</span>: <span class="s2">"8688"</span>,
+            <span class="s2">"commit_weight"</span>: <span class="s2">"600"</span>,
+            <span class="s2">"fee_per_kw"</span>: <span class="s2">"12000"</span>,
+            <span class="s2">"unsettled_balance"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"total_satoshis_sent"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"total_satoshis_received"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"num_updates"</span>: <span class="s2">"0"</span>,
+             <span class="s2">"pending_htlcs"</span>: <span class="o">[</span>
+            <span class="o">]</span>,
+            <span class="s2">"csv_delay"</span>: 4
+        <span class="o">}</span>
+    <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Send the payment from <code class="highlighter-rouge">Alice</code> to <code class="highlighter-rouge">Bob</code>.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Add invoice on "Bob" side:</span>
+bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet addinvoice <span class="nt">--amt</span><span class="o">=</span>10000
+<span class="o">{</span>
+        <span class="s2">"r_hash"</span>: <span class="s2">"&lt;your_random_rhash_here&gt;"</span>, 
+        <span class="s2">"pay_req"</span>: <span class="s2">"&lt;encoded_invoice&gt;"</span>, 
+<span class="o">}</span>
+
+<span class="c"># Send payment from "Alice" to "Bob":</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;encoded_invoice&gt;
+
+<span class="c"># Check "Alice"'s channel balance</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet channelbalance
+
+<span class="c"># Check "Bob"'s channel balance</span>
+bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet channelbalance
+</code></pre></div></div>
+
+<p>Now we have open channel in which we sent only one payment, let’s imagine
+that we sent lots of them and we’d now like to close the channel. Let’s do
+it!</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># List the "Alice" channel and retrieve "channel_point" which represents</span>
+<span class="c"># the opened channel:</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listchannels
+<span class="o">{</span>
+    <span class="s2">"channels"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+            <span class="s2">"active"</span>: <span class="nb">true</span>,
+            <span class="s2">"remote_pubkey"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
+       <span class="nt">----</span><span class="o">&gt;</span><span class="s2">"channel_point"</span>: <span class="s2">"3511ae8a52c97d957eaf65f828504e68d0991f0276adff94c6ba91c7f6cd4275:0"</span>,
+            <span class="s2">"chan_id"</span>: <span class="s2">"1337006139441152"</span>,
+            <span class="s2">"capacity"</span>: <span class="s2">"1005000"</span>,
+            <span class="s2">"local_balance"</span>: <span class="s2">"990000"</span>,
+            <span class="s2">"remote_balance"</span>: <span class="s2">"10000"</span>,
+            <span class="s2">"commit_fee"</span>: <span class="s2">"8688"</span>,
+            <span class="s2">"commit_weight"</span>: <span class="s2">"724"</span>,
+            <span class="s2">"fee_per_kw"</span>: <span class="s2">"12000"</span>,
+            <span class="s2">"unsettled_balance"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"total_satoshis_sent"</span>: <span class="s2">"10000"</span>,
+            <span class="s2">"total_satoshis_received"</span>: <span class="s2">"0"</span>,
+            <span class="s2">"num_updates"</span>: <span class="s2">"2"</span>,
+            <span class="s2">"pending_htlcs"</span>: <span class="o">[</span>
+            <span class="o">]</span>,
+            <span class="s2">"csv_delay"</span>: 4
+        <span class="o">}</span>
+    <span class="o">]</span>
+<span class="o">}</span>
+
+<span class="c"># Channel point consists of two numbers separated by a colon. The first one </span>
+<span class="c"># is "funding_txid" and the second one is "output_index":</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet closechannel <span class="nt">--funding_txid</span><span class="o">=</span>&lt;funding_txid&gt; <span class="nt">--output_index</span><span class="o">=</span>&lt;output_index&gt;
+
+<span class="c"># Include close transaction in a block thereby closing the channel:</span>
+<span class="nv">$ </span>docker-compose run btcctl generate 3
+
+<span class="c"># Check "Alice" on-chain balance was credited by her settled amount in the channel:</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet walletbalance
+
+<span class="c"># Check "Bob" on-chain balance was credited with the funds he received in the</span>
+<span class="c"># channel:</span>
+bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet walletbalance
+<span class="o">{</span>
+    <span class="s2">"total_balance"</span>: <span class="s2">"10000"</span>,
+    <span class="s2">"confirmed_balance"</span>: <span class="s2">"10000"</span>,
+    <span class="s2">"unconfirmed_balance"</span>: <span class="s2">"0"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="connect-to-faucet-lightning-node">Connect to faucet lightning node</h3>
+<p>In order to be more confident with <code class="highlighter-rouge">lnd</code> commands I suggest you to try 
+to create a mini lightning network cluster (<a href="#create-lightning-network-cluster">Create lightning network cluster</a>).</p>
+
+<p>In this section we will try to connect our node to the faucet/hub node 
+which we will create a channel with and send some amount of 
+bitcoins. The schema will be following:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+ ----- +                   + ------ +         (1)        + --- +
+| Alice | &lt;--- channel ---&gt; | Faucet |  &lt;--- channel ---&gt; | Bob |    
++ ----- +                   + ------ +                    + --- +        
+    |                            |                           |           
+    |                            |                           |      &lt;---  (2)         
+    + - - - -  - - - - - - - - - + - - - - - - - - - - - - - +            
+                                 |
+                       + --------------- +
+                       | Bitcoin network |  &lt;---  (3)   
+                       + --------------- +        
+        
+        
+ (1) You may connect an additional node "Bob" and make the multihop
+ payment Alice-&gt;Faucet-&gt;Bob
+  
+ (2) "Faucet", "Alice" and "Bob" are the lightning network daemons which 
+ create channels to interact with each other using the Bitcoin network 
+ as source of truth.
+ 
+ (3) In current scenario "Alice" and "Faucet" lightning network nodes 
+ connect to different Bitcoin nodes. If you decide to connect "Bob"
+ to "Faucet" then the already created "btcd" node would be sufficient.
+</code></pre></div></div>
+
+<p>First of all you need to run <code class="highlighter-rouge">btcd</code> node in <code class="highlighter-rouge">testnet</code> and wait for it to be 
+synced with test network (<code class="highlighter-rouge">May the Force and Patience be with you</code>).</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Init bitcoin network env variable:</span>
+<span class="nv">$ </span><span class="nb">export </span><span class="nv">NETWORK</span><span class="o">=</span><span class="s2">"testnet"</span>
+
+<span class="c"># Run "btcd" node:</span>
+<span class="nv">$ </span>docker-compose up <span class="nt">-d</span> <span class="s2">"btcd"</span>
+</code></pre></div></div>
+
+<p>After <code class="highlighter-rouge">btcd</code> synced, connect <code class="highlighter-rouge">Alice</code> to the <code class="highlighter-rouge">Faucet</code> node.</p>
+
+<p>The <code class="highlighter-rouge">Faucet</code> node address can be found at the <a href="https://faucet.lightning.community">Faucet Lightning Community webpage</a>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Run "Alice" container and log into it:</span>
+<span class="nv">$ </span>docker-compose run <span class="nt">-d</span> <span class="nt">--name</span> alice lnd_btc<span class="p">;</span> docker <span class="nb">exec</span> <span class="nt">-i</span> <span class="nt">-t</span> <span class="s2">"alice"</span> bash
+
+<span class="c"># Connect "Alice" to the "Faucet" node:</span>
+alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>testnet connect &lt;faucet_identity_address&gt;@&lt;faucet_host&gt;
+</code></pre></div></div>
+
+<p>After a connection is achieved, the <code class="highlighter-rouge">Faucet</code> node should create the channel
+and send some amount of bitcoins to <code class="highlighter-rouge">Alice</code>.</p>
+
+<p><strong>What you may do next?:</strong></p>
+<ul>
+  <li>Send some amount to <code class="highlighter-rouge">Faucet</code> node back.</li>
+  <li>Connect <code class="highlighter-rouge">Bob</code> node to the <code class="highlighter-rouge">Faucet</code> and make multihop payment (<code class="highlighter-rouge">Alice-&gt;Faucet-&gt;Bob</code>)</li>
+  <li>Close channel with <code class="highlighter-rouge">Faucet</code> and check the onchain balance.</li>
+</ul>
+
+<h3 id="questions">Questions</h3>
+<p><a href="https://webchat.freenode.net/?channels=lnd"><img src="https://img.shields.io/badge/chat-on%20freenode-brightgreen.svg" alt="Irc" /></a></p>
+
+<ul>
+  <li>How to see <code class="highlighter-rouge">alice</code> | <code class="highlighter-rouge">bob</code> | <code class="highlighter-rouge">btcd</code> logs?
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose logs &lt;alice|bob|btcd&gt;
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Lightning Network Developers</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Max Fang
+            
+            </li>
+            
+            <li>
+              <a href="mailto:max@lightning.engineering">
+                <span>max@lightning.engineering</span>
+              </a>
+            </li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/lightningnetwork/lnd"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">lnd</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/lightning"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">lightning</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Developer resources and documentation for the Lightning Network Daemon.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

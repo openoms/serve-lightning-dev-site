@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Code Contribution Guidelines</title>
+  <meta name="description" content="Developer resources and documentation for the Lightning Network Daemon.">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="/assets/dropdown.css">
+  <link rel="canonical" href="http://0.0.0.0:4000/contribute/">
+  <link rel="alternate" type="application/rss+xml" title="Lightning Network Developers" href="/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <a class="site-title" href="/">Lightning Network Developers</a>
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          <div class="dropdown">
+            <a class="page-link" href="/guides"><button class="dropbtn">Guides</button></a>
+            <div class="dropdown-content">
+              <a href="/overview/">Overview</a>
+              <a href="/guides/installation/">Installation</a>
+              <a href="/tutorial/">Tutorial</a>
+              <a href="/guides/python-grpc/">Python</a>
+              <a href="/guides/javascript-grpc/">Javascript</a>
+              <a href="/guides/docker/">Docker</a>
+            </div>
+          </div>
+          <a class="page-link" href="//api.lightning.community">API</a>
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Code Contribution Guidelines</h1>
+  </header>
+
+  <div class="post-content">
+    <h3 id="table-of-contents">Table of Contents</h3>
+<ol>
+  <li><a href="#Overview">Overview</a><br /></li>
+  <li><a href="#MinSkillset">Minimum Recommended Skillset</a><br /></li>
+  <li><a href="#ReqReading">Required Reading</a><br /></li>
+  <li><a href="#DevelopmentPractices">Development Practices</a><br />
+4.1. <a href="#ShareEarly">Share Early, Share Often</a><br />
+4.2. <a href="#Testing">Testing</a><br />
+4.3. <a href="#CodeDocumentation">Code Documentation and Commenting</a><br />
+4.4. <a href="#ModelGitCommitMessages">Model Git Commit Messages</a><br />
+4.5. <a href="#IdealGitCommitStructure">Ideal Git Commit Structure</a><br />
+4.6. <a href="#CodeSpacing">Code Spacing</a><br />
+4.7. <a href="#Protobuf">Protobuf Compilation</a><br />
+4.8. <a href="ExtraGoFmtStyle">Additional Style Constraints On Top of gofmt</a><br /></li>
+  <li><a href="#CodeApproval">Code Approval Process</a><br />
+5.1. <a href="#CodeReview">Code Review</a><br />
+5.2. <a href="#CodeRework">Rework Code (if needed)</a><br />
+5.3. <a href="#CodeAcceptance">Acceptance</a><br /></li>
+  <li><a href="#Standards">Contribution Standards</a><br />
+6.1. <a href="#Checklist">Contribution Checklist</a><br />
+6.2. <a href="#Licensing">Licensing of Contributions</a><br /></li>
+</ol>
+
+<p><a name="Overview"></a></p>
+
+<h3 id="1-overview">1. Overview</h3>
+
+<p>Developing cryptocurrencies is an exciting endeavor that touches a wide variety
+of areas such as wire protocols, peer-to-peer networking, databases,
+cryptography, language interpretation (transaction scripts), adversarial
+threat-modeling, and RPC systems. They also represent a radical shift to the
+current fiscal system and as a result provide an opportunity to help reshape
+the entire financial system. With the advent of the <a href="https://lightning.network/">Lightning Network
+(LN)</a>, new layers are being constructed upon the
+base blockchain layer which have the potential to alleviate many of the
+limitations and constraints inherent in the design of blockchains. There are
+few projects that offer this level of diversity and impact all in one code
+base.</p>
+
+<p>However, as exciting as it is, one must keep in mind that cryptocurrencies
+represent real money and introducing bugs and security vulnerabilities can have
+far more dire consequences than in typical projects where having a small bug is
+minimal by comparison.  In the world of cryptocurrencies, even the smallest bug
+in the wrong area can cost people a significant amount of money.  For this
+reason, the Lightning Network Daemon (<code class="highlighter-rouge">lnd</code>) has a formalized and rigorous
+development process (heavily inspired by
+<a href="https://github.com/btcsuite">btcsuite</a>) which is outlined on this page.</p>
+
+<p>We highly encourage code contributions, however it is imperative that you adhere
+to the guidelines established on this page.</p>
+
+<p><a name="MinSkillset"></a></p>
+
+<h3 id="2-minimum-recommended-skillset">2. Minimum Recommended Skillset</h3>
+
+<p>The following list is a set of core competencies that we recommend you possess
+before you really start attempting to contribute code to the project.  These are
+not hard requirements as we will gladly accept code contributions as long as
+they follow the guidelines set forth on this page.  That said, if you don’t have
+the following basic qualifications you will likely find it quite difficult to
+contribute to the core layers of Lightning. However, there are still a number
+of low hanging fruit which can be tackled without having full competency in the
+areas mentioned below.</p>
+
+<ul>
+  <li>A reasonable understanding of bitcoin at a high level (see the
+<a href="#ReqReading">Required Reading</a> section for the original white paper)</li>
+  <li>A reasonable understanding of the Lightning Network at a high level</li>
+  <li>Experience in some type of C-like language</li>
+  <li>An understanding of data structures and their performance implications</li>
+  <li>Familiarity with unit testing</li>
+  <li>Debugging experience</li>
+  <li>Ability to understand not only the area you are making a change in, but also
+the code your change relies on, and the code which relies on your changed code</li>
+</ul>
+
+<p>Building on top of those core competencies, the recommended skill set largely
+depends on the specific areas you are looking to contribute to.  For example,
+if you wish to contribute to the cryptography code, you should have a good
+understanding of the various aspects involved with cryptography such as the
+security and performance implications.</p>
+
+<p><a name="ReqReading"></a></p>
+
+<h3 id="3-required-reading">3. Required Reading</h3>
+
+<ul>
+  <li><a href="http://golang.org/doc/effective_go.html">Effective Go</a> - The entire <code class="highlighter-rouge">lnd</code> 
+project follows the guidelines in this document.  For your code to be accepted,
+it must follow the guidelines therein.</li>
+  <li><a href="https://bitcoin.org/bitcoin.pdf">Original Satoshi Whitepaper</a> - This is the white paper that started it all.  Having a solid
+foundation to build on will make the code much more comprehensible.</li>
+  <li><a href="https://lightning.network/lightning-network-paper.pdf">Lightning Network Whitepaper</a> - This is the white paper that kicked off the Layer 2 revolution. Having a good grasp of the concepts of Lightning will make the core logic within the daemon much more comprehensible: Bitcoin Script, off-chain blockchain protocols, payment channels, bi-directional payment channels, relative and absolute time-locks, commitment state revocations, and Segregated Witness.
+    <ul>
+      <li>The original LN was written for a rather narrow audience, the paper may be a bit unapproachable to many. Thanks to the Bitcoin community, there exist many easily accessible supplemental resources which can help one see how all the pieces fit together from double-spend protection all the way up to commitment state transitions and Hash Time Locked Contracts (HTLCs):
+        <ul>
+          <li><a href="https://lightning.network/lightning-network-summary.pdf">Lightning Network Summary</a></li>
+          <li><a href="https://bitcoinmagazine.com/articles/understanding-the-lightning-network-part-building-a-bidirectional-payment-channel-1464710791">Understanding the Lightning Network 3-Part series</a></li>
+          <li><a href="https://github.com/ElementsProject/lightning/blob/master/doc/deployable-lightning.pdf">Deployable Lightning</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>Note that the core design of the Lightning Network has shifted over time as
+concrete implementation and design has expanded our knowledge beyond the
+original white paper. Therefore, specific information outlined in the resources
+above may be a bit out of date. Many implementers are currently working on an
+initial <a href="https://github.com/lightningnetwork/lightning-rfc">Lightning Network Specifications</a>.
+Once the specification is finalized, it will be the most up-to-date
+comprehensive document explaining the Lightning Network. As a result, it will
+be recommended for newcomers to read first in order to get up to speed.</p>
+
+<p><a name="DevelopmentPractices"></a></p>
+
+<h3 id="4-development-practices">4. Development Practices</h3>
+
+<p>Developers are expected to work in their own trees and submit pull requests when
+they feel their feature or bug fix is ready for integration into the  master
+branch.</p>
+
+<p><a name="ShareEarly"></a></p>
+
+<h4 id="41-share-early-share-often">4.1. Share Early, Share Often</h4>
+
+<p>We firmly believe in the share early, share often approach.  The basic premise
+of the approach is to announce your plans <strong>before</strong> you start work, and once
+you have started working, craft your changes into a stream of small and easily
+reviewable commits.</p>
+
+<p>This approach has several benefits:</p>
+
+<ul>
+  <li>Announcing your plans to work on a feature <strong>before</strong> you begin work avoids
+duplicate work</li>
+  <li>It permits discussions which can help you achieve your goals in a way that is
+consistent with the existing architecture</li>
+  <li>It minimizes the chances of you spending time and energy on a change that
+might not fit with the consensus of the community or existing architecture and
+potentially be rejected as a result</li>
+  <li>The quicker your changes are merged to master, the less time you will need to
+spend rebasing and otherwise trying to keep up with the main code base</li>
+</ul>
+
+<p><a name="Testing"></a></p>
+
+<h4 id="42-testing">4.2. Testing</h4>
+
+<p>One of the major design goals of all of <code class="highlighter-rouge">lnd</code>’s packages and the daemon itself is
+to aim for a high degree of test coverage.  This is financial software so bugs
+and regressions in the core logic can cost people real money.  For this reason
+every effort must be taken to ensure the code is as accurate and bug-free as
+possible.  Thorough testing is a good way to help achieve that goal.</p>
+
+<p>Unless a new feature you submit is completely trivial, it will probably be
+rejected unless it is also accompanied by adequate test coverage for both
+positive and negative conditions.  That is to say, the tests must ensure your
+code works correctly when it is fed correct data as well as incorrect data
+(error paths).</p>
+
+<p>Go provides an excellent test framework that makes writing test code and
+checking coverage statistics straightforward.  For more information about the
+test coverage tools, see the <a href="http://blog.golang.org/cover">golang cover blog post</a>.</p>
+
+<p>A quick summary of test practices follows:</p>
+<ul>
+  <li>All new code should be accompanied by tests that ensure the code behaves
+correctly when given expected values, and, perhaps even more importantly, that
+it handles errors gracefully</li>
+  <li>When you fix a bug, it should be accompanied by tests which exercise the bug
+to both prove it has been resolved and to prevent future regressions</li>
+  <li>Changes to publicly exported packages such as
+<a href="https://github.com/lightningnetwork/lnd/tree/master/brontide">brontide</a> should
+be accompanied by unit tests exercising the new or changed behavior.</li>
+  <li>Changes to behavior within the daemon’s interaction with the P2P protocol,
+or RPC’s will need to be accompanied by integration tests which use the
+<a href="https://github.com/lightningnetwork/lnd/blob/master/lntest/harness.go"><code class="highlighter-rouge">networkHarness</code>framework</a>
+contained within <code class="highlighter-rouge">lnd</code>. For example integration tests, see
+<a href="https://github.com/lightningnetwork/lnd/blob/master/lntest/itest/lnd_test.go#L203"><code class="highlighter-rouge">lnd_test.go</code></a>.</li>
+</ul>
+
+<p>Throughout the process of contributing to <code class="highlighter-rouge">lnd</code>, you’ll likely also be
+extensively using the commands within our <code class="highlighter-rouge">Makefile</code>. As a result, we recommend
+<a href="https://github.com/lightningnetwork/lnd/blob/master/docs/MAKEFILE.md">perusing the make file documentation</a>.</p>
+
+<p><a name="CodeDocumentation"></a></p>
+
+<h4 id="43-code-documentation-and-commenting">4.3. Code Documentation and Commenting</h4>
+
+<ul>
+  <li>At a minimum every function must be commented with its intended purpose and
+any assumptions that it makes
+    <ul>
+      <li>Function comments must always begin with the name of the function per
+<a href="http://golang.org/doc/effective_go.html">Effective Go</a></li>
+      <li>Function comments should be complete sentences since they allow a wide
+variety of automated presentations such as <a href="https://godoc.org">godoc.org</a></li>
+      <li>The general rule of thumb is to look at it as if you were completely
+unfamiliar with the code and ask yourself, would this give me enough
+information to understand what this function does and how I’d probably want
+to use it?</li>
+    </ul>
+  </li>
+  <li>Exported functions should also include detailed information the caller of the
+function will likely need to know and/or understand:<br /><br /></li>
+</ul>
+
+<p><strong>WRONG</strong></p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// generates a revocation key</span>
+<span class="k">func</span> <span class="n">DeriveRevocationPubkey</span><span class="p">(</span><span class="n">commitPubKey</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="p">,</span>
+	<span class="n">revokePreimage</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span> <span class="p">{</span>
+</code></pre></div></div>
+<p><strong>RIGHT</strong></p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// DeriveRevocationPubkey derives the revocation public key given the</span>
+<span class="c">// counterparty's commitment key, and revocation preimage derived via a</span>
+<span class="c">// pseudo-random-function. In the event that we (for some reason) broadcast a</span>
+<span class="c">// revoked commitment transaction, then if the other party knows the revocation</span>
+<span class="c">// preimage, then they'll be able to derive the corresponding private key to</span>
+<span class="c">// this private key by exploiting the homomorphism in the elliptic curve group:</span>
+<span class="c">//    * https://en.wikipedia.org/wiki/Group_homomorphism#Homomorphisms_of_abelian_groups</span>
+<span class="c">//</span>
+<span class="c">// The derivation is performed as follows:</span>
+<span class="c">//</span>
+<span class="c">//   revokeKey := commitKey + revokePoint</span>
+<span class="c">//             := G*k + G*h</span>
+<span class="c">//             := G * (k+h)</span>
+<span class="c">//</span>
+<span class="c">// Therefore, once we divulge the revocation preimage, the remote peer is able to</span>
+<span class="c">// compute the proper private key for the revokeKey by computing:</span>
+<span class="c">//   revokePriv := commitPriv + revokePreimge mod N</span>
+<span class="c">//</span>
+<span class="c">// Where N is the order of the sub-group.</span>
+<span class="k">func</span> <span class="n">DeriveRevocationPubkey</span><span class="p">(</span><span class="n">commitPubKey</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="p">,</span>
+	<span class="n">revokePreimage</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span> <span class="p">{</span>
+</code></pre></div></div>
+<ul>
+  <li>Comments in the body of the code are highly encouraged, but they should
+explain the intention of the code as opposed to just calling out the
+obvious<br /><br /></li>
+</ul>
+
+<p><strong>WRONG</strong></p>
+<pre><code class="language-Go">// return err if amt is less than 546
+if amt &lt; 546 {
+	return err
+}
+</code></pre>
+<p><strong>RIGHT</strong></p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Treat transactions with amounts less than the amount which is considered dust</span>
+<span class="c">// as non-standard.</span>
+<span class="k">if</span> <span class="n">amt</span> <span class="o">&lt;</span> <span class="m">546</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">err</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p><strong>NOTE:</strong> The above should really use a constant as opposed to a magic number,
+but it was left as a magic number to show how much of a difference a good
+comment can make.</p>
+
+<p><a name="ModelGitCommitMessages"></a></p>
+
+<h4 id="44-model-git-commit-messages">4.4. Model Git Commit Messages</h4>
+
+<p>This project prefers to keep a clean commit history with well-formed commit
+messages.  This section illustrates a model commit message and provides a bit
+of background for it.  This content was originally created by Tim Pope and made
+available on his website, however that website is no longer active, so it is
+being provided here.</p>
+
+<p>Here’s a model Git commit message:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Short (50 chars or less) summary of changes
+
+More detailed explanatory text, if necessary.  Wrap it to about 72
+characters or so.  In some contexts, the first line is treated as the
+subject of an email and the rest of the text as the body.  The blank
+line separating the summary from the body is critical (unless you omit
+the body entirely); tools like rebase can get confused if you run the
+two together.
+
+Write your commit message in the present tense: "Fix bug" and not "Fixed
+bug."  This convention matches up with commit messages generated by
+commands like git merge and git revert.
+
+Further paragraphs come after blank lines.
+
+- Bullet points are okay, too
+- Typically a hyphen or asterisk is used for the bullet, preceded by a
+  single space, with blank lines in between, but conventions vary here
+- Use a hanging indent
+</code></pre></div></div>
+
+<p>Here are some of the reasons why wrapping your commit messages to 72 columns is
+a good thing.</p>
+
+<ul>
+  <li>git log doesn’t do any special wrapping of the commit messages. With
+the default pager of less -S, this means your paragraphs flow far off the edge
+of the screen, making them difficult to read. On an 80 column terminal, if we
+subtract 4 columns for the indent on the left and 4 more for symmetry on the
+right, we’re left with 72 columns.</li>
+  <li>git format-patch –stdout converts a series of commits to a series of emails,
+using the messages for the message body.  Good email netiquette dictates we
+wrap our plain text emails such that there’s room for a few levels of nested
+reply indicators without overflow in an 80 column terminal.</li>
+</ul>
+
+<p>In addition to the Git commit message structure adhered to within the daemon
+all short-<a href="https://golang.org/doc/contribute.html#change">commit messages are to be prefixed according to the convention
+outlined in the Go project</a>. All
+commits should begin with the subsystem or package primarily affected by the
+change. In the case of a widespread change, the packages are to be delimited by
+either a ‘+’ or a ‘,’. This prefix seems minor but can be extremely helpful in
+determining the scope of a commit at a glance, or when bug hunting to find a
+commit which introduced a bug or regression.</p>
+
+<p><a name="IdealGitCommitStructure"></a></p>
+
+<h4 id="45-ideal-git-commit-structure">4.5. Ideal Git Commit Structure</h4>
+
+<p>Within the project we prefer small, contained commits for a pull request over a
+single giant commit that touches several files/packages. Ideal commits build on
+their own, in order to facilitate easy usage of tools like <code class="highlighter-rouge">git bisect</code> to <code class="highlighter-rouge">git
+cherry-pick</code>. It’s preferred that commits contain an isolated change in a
+single package. In this case, the commit header message should begin with the
+prefix of the modified package. For example, if a commit was made to modify the
+<code class="highlighter-rouge">lnwallet</code> package, it should start with <code class="highlighter-rouge">lnwallet: </code>.</p>
+
+<p>In the case of changes that only build in tandem with changes made in other
+packages, it is permitted for a single commit to be made which contains several
+prefixes such as: <code class="highlighter-rouge">lnwallet+htlcswitch</code>. This prefix structure along with the
+requirement for atomic contained commits (when possible) make things like
+scanning the set of commits and debugging easier. In the case of a change that
+touches several packages, and can only compile with the change across several
+packages, a <code class="highlighter-rouge">multi: </code> prefix should be used.</p>
+
+<p><a name="CodeSpacing"></a></p>
+
+<h4 id="46-code-spacing">4.6. Code Spacing</h4>
+
+<p>Blocks of code within <code class="highlighter-rouge">lnd</code> should be segmented into logical stanzas of
+operation. Such spacing makes the code easier to follow at a skim, and reduces
+unnecessary line noise. Coupled with the commenting scheme specified above,
+proper spacing allows readers to quickly scan code, extracting semantics quickly.
+Functions should <em>not</em> just be laid out as a bare contiguous block of code.</p>
+
+<p><strong>WRONG</strong></p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">witness</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="m">4</span><span class="p">)</span>
+	<span class="n">witness</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="no">nil</span>
+	<span class="k">if</span> <span class="n">bytes</span><span class="o">.</span><span class="n">Compare</span><span class="p">(</span><span class="n">pubA</span><span class="p">,</span> <span class="n">pubB</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="m">1</span> <span class="p">{</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
+	<span class="p">}</span>
+	<span class="n">witness</span><span class="p">[</span><span class="m">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">witnessScript</span>
+	<span class="k">return</span> <span class="n">witness</span>
+</code></pre></div></div>
+<p><strong>RIGHT</strong></p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">witness</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="m">4</span><span class="p">)</span>
+
+	<span class="c">// When spending a p2wsh multi-sig script, rather than an OP_0, we add</span>
+	<span class="c">// a nil stack element to eat the extra pop.</span>
+	<span class="n">witness</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="no">nil</span>
+
+	<span class="c">// When initially generating the witnessScript, we sorted the serialized</span>
+	<span class="c">// public keys in descending order. So we do a quick comparison in order</span>
+	<span class="c">// to ensure the signatures appear on the Script Virtual Machine stack in</span>
+	<span class="c">// the correct order.</span>
+	<span class="k">if</span> <span class="n">bytes</span><span class="o">.</span><span class="n">Compare</span><span class="p">(</span><span class="n">pubA</span><span class="p">,</span> <span class="n">pubB</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="m">1</span> <span class="p">{</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
+		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
+	<span class="p">}</span>
+
+	<span class="c">// Finally, add the preimage as the last witness element.</span>
+	<span class="n">witness</span><span class="p">[</span><span class="m">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">witnessScript</span>
+
+	<span class="k">return</span> <span class="n">witness</span>
+</code></pre></div></div>
+
+<p><a name="Protobuf"></a></p>
+
+<h4 id="47-protobuf-compilation">4.7. Protobuf Compilation</h4>
+
+<p>The <code class="highlighter-rouge">lnd</code> project uses <code class="highlighter-rouge">protobuf</code>, and its extension <a href="https://www.grpc.io/"><code class="highlighter-rouge">gRPC</code></a> in
+several areas and as the primary RPC interface. In order to ensure uniformity
+of all protos checked, in we require that all contributors pin against the
+<em>exact same</em> version of <code class="highlighter-rouge">protoc</code>. As of the writing of this article, the <code class="highlighter-rouge">lnd</code>
+project uses <a href="https://github.com/google/protobuf/releases/tag/v3.4.0">v3.4.0</a>
+of <code class="highlighter-rouge">protoc</code>.</p>
+
+<p>The following commit hashes of related projects are also required in order to
+generate identical compiled protos and related files:</p>
+<ul>
+  <li>grpc-ecosystem/grpc-gateway: <code class="highlighter-rouge">f2862b476edcef83412c7af8687c9cd8e4097c0f</code></li>
+  <li>golang/protobuf: <code class="highlighter-rouge">ab9f9a6dab164b7d1246e0e688b0ab7b94d8553e</code></li>
+</ul>
+
+<p>For detailed instructions on how to compile modifications to <code class="highlighter-rouge">lnd</code>’s <code class="highlighter-rouge">protobuf</code>
+definitions, check out the <a href="https://github.com/lightningnetwork/lnd/blob/master/lnrpc/README.md">lnrpc README</a>.</p>
+
+<p>Additionally, in order to maintain a uniform display of the RPC responses
+rendered by <code class="highlighter-rouge">lncli</code>, all added or modified <code class="highlighter-rouge">protof</code> definitions, <em>must</em> attach
+the proper <code class="highlighter-rouge">json_name</code> option for all fields. An example of such an option can
+be found within the definition of the <code class="highlighter-rouge">DebugLevelResponse</code> struct:</p>
+
+<div class="language-protobuf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">message</span> <span class="nc">DebugLevelResponse</span> <span class="p">{</span>
+    <span class="kt">string</span> <span class="na">sub_systems</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">[</span> <span class="na">json_name</span> <span class="o">=</span> <span class="s">"sub_systems"</span> <span class="p">];</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>Notice how the <code class="highlighter-rouge">json_name</code> field option corresponds with the name of the field
+itself, and uses a <code class="highlighter-rouge">snake_case</code> style of name formatting. All added or modified
+<code class="highlighter-rouge">proto</code> fields should adhere to the format above.</p>
+
+<p><a name="ExtraGoFmtStyle"></a></p>
+
+<h4 id="48-additional-style-constraints-on-top-of-gofmt">4.8. Additional Style Constraints On Top of <code class="highlighter-rouge">gofmt</code></h4>
+
+<p>Before a PR is submitted, the proposer should ensure that the file passes the
+set of linting scripts run by <code class="highlighter-rouge">make lint</code>. These include <code class="highlighter-rouge">gofmt</code>. In addition
+to <code class="highlighter-rouge">gofmt</code> we’ve opted to enforce the following style guidelines.</p>
+
+<ul>
+  <li>ALL columns (on a best effort basis) should be wrapped to 80 line columns.
+Editors should be set to treat a tab as 4 spaces.</li>
+  <li>
+    <p>When wrapping a line that contains a function call as the unwrapped line
+exceeds the column limit, the close paren should be placed on its own
+line. Additionally, all arguments should begin in a new line after the
+open paren.</p>
+
+    <p><strong>WRONG</strong></p>
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">value</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">bar</span><span class="p">(</span><span class="n">a</span>
+   <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <p><strong>RIGHT</strong></p>
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">value</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">bar</span><span class="p">(</span>
+   <span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p><a name="CodeApproval"></a></p>
+
+<h3 id="5-code-approval-process">5. Code Approval Process</h3>
+
+<p>This section describes the code approval process that is used for code
+contributions.  This is how to get your changes into <code class="highlighter-rouge">lnd</code>.</p>
+
+<p><a name="CodeReview"></a></p>
+
+<h4 id="51-code-review">5.1. Code Review</h4>
+
+<p>All code which is submitted will need to be reviewed before inclusion into the
+master branch.  This process is performed by the project maintainers and usually
+other committers who are interested in the area you are working in as well.</p>
+
+<h5 id="code-review-timeframe">Code Review Timeframe</h5>
+
+<p>The timeframe for a code review will vary greatly depending on factors such as
+the number of other pull requests which need to be reviewed, the size and
+complexity of the contribution, how well you followed the guidelines presented
+on this page, and how easy it is for the reviewers to digest your commits.  For
+example, if you make one monolithic commit that makes sweeping changes to things
+in multiple subsystems, it will obviously take much longer to review.  You will
+also likely be asked to split the commit into several smaller, and hence more
+manageable, commits.</p>
+
+<p>Keeping the above in mind, most small changes will be reviewed within a few
+days, while large or far reaching changes may take weeks.  This is a good reason
+to stick with the <a href="#ShareEarly">Share Early, Share Often</a> development practice
+outlined above.</p>
+
+<h5 id="what-is-the-review-looking-for">What is the review looking for?</h5>
+
+<p>The review is mainly ensuring the code follows the <a href="#DevelopmentPractices">Development Practices</a>
+and <a href="#Standards">Code Contribution Standards</a>.  However, there are a few other
+checks which are generally performed as follows:</p>
+
+<ul>
+  <li>The code is stable and has no stability or security concerns</li>
+  <li>The code is properly using existing APIs and generally fits well into the
+overall architecture</li>
+  <li>The change is not something which is deemed inappropriate by community
+consensus</li>
+</ul>
+
+<p><a name="CodeRework"></a></p>
+
+<h4 id="52-rework-code-if-needed">5.2. Rework Code (if needed)</h4>
+
+<p>After the code review, the change will be accepted immediately if no issues are
+found.  If there are any concerns or questions, you will be provided with
+feedback along with the next steps needed to get your contribution merged with
+master.  In certain cases the code reviewer(s) or interested committers may help
+you rework the code, but generally you will simply be given feedback for you to
+make the necessary changes.</p>
+
+<p>During the process of responding to review comments, we prefer that changes be
+made with <a href="https://thoughtbot.com/blog/autosquashing-git-commits">fixup commits</a>. 
+The reason for this is two fold: it makes it easier for the reviewer to see
+what changes have been made between versions (since Github doesn’t easily show
+prior versions like Critique) and it makes it easier on the PR author as they
+can set it to auto squash the fix up commits on rebase.</p>
+
+<p>This process will continue until the code is finally accepted.</p>
+
+<p><a name="CodeAcceptance"></a></p>
+
+<h4 id="53-acceptance">5.3. Acceptance</h4>
+
+<p>Once your code is accepted, it will be integrated with the master branch. After
+2+ (sometimes 1) LGTM’s (approvals) are given on a PR, it’s eligible to land in
+master. At this final phase, it may be necessary to rebase the PR in order to
+resolve any conflicts and also squash fix up commits. Ideally, the set of
+<a href="https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work">commits by new contributors are PGP signed</a>, 
+although this isn’t a strong requirement (but we prefer it!). In order to keep
+these signatures intact, we prefer using merge commits. PR proposers can use
+<code class="highlighter-rouge">git rebase --signoff</code> to sign and rebase at the same time as a final step.</p>
+
+<p>Rejoice as you will now be listed as a <a href="https://github.com/lightningnetwork/lnd/graphs/contributors">contributor</a>!</p>
+
+<p><a name="Standards"></a></p>
+
+<h3 id="6-contribution-standards">6. Contribution Standards</h3>
+
+<p><a name="Checklist"></a></p>
+
+<h4 id="61-contribution-checklist">6.1. Contribution Checklist</h4>
+
+<ul>
+  <li>[  ] All changes are Go version 1.11 compliant</li>
+  <li>[  ] The code being submitted is commented according to the
+<a href="#CodeDocumentation">Code Documentation and Commenting</a> section</li>
+  <li>[  ] For new code: Code is accompanied by tests which exercise both
+the positive and negative (error paths) conditions (if applicable)</li>
+  <li>[  ] For bug fixes: Code is accompanied by new tests which trigger
+the bug being fixed to prevent regressions</li>
+  <li>[  ] Any new logging statements use an appropriate subsystem and
+logging level</li>
+  <li>[  ] Code has been formatted with <code class="highlighter-rouge">go fmt</code></li>
+  <li>[  ] For code and documentation: lines are wrapped at 80 characters
+(the tab character should be counted as 8 characters, not 4, as some IDEs do
+per default)</li>
+  <li>[  ] Running <code class="highlighter-rouge">make unit</code> and <code class="highlighter-rouge">make itest</code> do not fail any tests</li>
+  <li>[  ] Running <code class="highlighter-rouge">go vet</code> does not report any issues</li>
+  <li>[  ] Running <code class="highlighter-rouge">make lint</code> does not report any <strong>new</strong> issues that
+did not already exist</li>
+</ul>
+
+<p><a name="Licensing"></a></p>
+
+<h4 id="62-licensing-of-contributions">6.2. Licensing of Contributions</h4>
+<hr />
+<p>All contributions must be licensed with the
+<a href="https://github.com/lightningnetwork/lnd/blob/master/LICENSE">MIT license</a>.  This is
+the same license as all of the code found within lnd.</p>
+
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>This document was heavily inspired by a <a href="https://github.com/btcsuite/btcd/blob/master/docs/code_contribution_guidelines.md">similar document outlining the code
+contribution</a>
+guidelines for btcd.</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Lightning Network Developers</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Max Fang
+            
+            </li>
+            
+            <li>
+              <a href="mailto:max@lightning.engineering">
+                <span>max@lightning.engineering</span>
+              </a>
+            </li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/lightningnetwork/lnd"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">lnd</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/lightning"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">lightning</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Developer resources and documentation for the Lightning Network Daemon.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

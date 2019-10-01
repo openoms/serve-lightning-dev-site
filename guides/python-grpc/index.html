@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>How to write a Python gRPC client for the Lightning Network Daemon</title>
+  <meta name="description" content="Developer resources and documentation for the Lightning Network Daemon.">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="/assets/dropdown.css">
+  <link rel="canonical" href="http://0.0.0.0:4000/guides/python-grpc/">
+  <link rel="alternate" type="application/rss+xml" title="Lightning Network Developers" href="/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <a class="site-title" href="/">Lightning Network Developers</a>
+
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          <div class="dropdown">
+            <a class="page-link" href="/guides"><button class="dropbtn">Guides</button></a>
+            <div class="dropdown-content">
+              <a href="/overview/">Overview</a>
+              <a href="/guides/installation/">Installation</a>
+              <a href="/tutorial/">Tutorial</a>
+              <a href="/guides/python-grpc/">Python</a>
+              <a href="/guides/javascript-grpc/">Javascript</a>
+              <a href="/guides/docker/">Docker</a>
+            </div>
+          </div>
+          <a class="page-link" href="//api.lightning.community">API</a>
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">How to write a Python gRPC client for the Lightning Network Daemon</h1>
+  </header>
+
+  <div class="post-content">
+    <p>This section enumerates what you need to do to write a client that communicates
+with <code class="highlighter-rouge">lnd</code> in Python.</p>
+
+<h3 id="setup-and-installation">Setup and Installation</h3>
+
+<p>Lnd uses the gRPC protocol for communication with clients like lncli. gRPC is
+based on protocol buffers and as such, you will need to compile the lnd proto
+file in Python before you can use it to communicate with lnd.</p>
+
+<ul>
+  <li>Create a virtual environment for your project
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ virtualenv lnd
+</code></pre></div>    </div>
+  </li>
+  <li>Activate the virtual environment
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ source lnd/bin/activate
+</code></pre></div>    </div>
+  </li>
+  <li>Install dependencies (googleapis-common-protos is required due to the use of
+google/api/annotations.proto)
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ pip install grpcio grpcio-tools googleapis-common-protos
+</code></pre></div>    </div>
+  </li>
+  <li>Clone the google api’s repository (required due to the use of
+google/api/annotations.proto)
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ git clone https://github.com/googleapis/googleapis.git
+</code></pre></div>    </div>
+  </li>
+  <li>Copy the lnd rpc.proto file (you’ll find this at
+<a href="https://github.com/lightningnetwork/lnd/blob/master/lnrpc/rpc.proto">lnrpc/rpc.proto</a>)
+or just download it
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ curl -o rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
+</code></pre></div>    </div>
+  </li>
+  <li>Compile the proto file
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_python_out=. rpc.proto
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>After following these steps, two files <code class="highlighter-rouge">rpc_pb2.py</code> and <code class="highlighter-rouge">rpc_pb2_grpc.py</code> will
+be generated. These files will be imported in your project anytime you use
+Python gRPC.</p>
+
+<h4 id="imports-and-client">Imports and Client</h4>
+
+<p>Every time you use Python gRPC, you will have to import the generated rpc modules
+and set up a channel and stub to your connect to your <code class="highlighter-rouge">lnd</code> node:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rpc_pb2</span> <span class="k">as</span> <span class="n">ln</span>
+<span class="kn">import</span> <span class="nn">rpc_pb2_grpc</span> <span class="k">as</span> <span class="n">lnrpc</span>
+<span class="kn">import</span> <span class="nn">grpc</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Due to updated ECDSA generated tls.cert we need to let gprc know that
+# we need to use that cipher suite otherwise there will be a handhsake
+# error when we communicate with the lnd rpc server.
+</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">"GRPC_SSL_CIPHER_SUITES"</span><span class="p">]</span> <span class="o">=</span> <span class="s">'HIGH+ECDSA'</span>
+
+<span class="c1"># Lnd cert is at ~/.lnd/tls.cert on Linux and
+# ~/Library/Application Support/Lnd/tls.cert on Mac
+</span><span class="n">cert</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">'~/.lnd/tls.cert'</span><span class="p">),</span> <span class="s">'rb'</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_channel_credentials</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">secure_channel</span><span class="p">(</span><span class="s">'localhost:10009'</span><span class="p">,</span> <span class="n">creds</span><span class="p">)</span>
+<span class="n">stub</span> <span class="o">=</span> <span class="n">lnrpc</span><span class="o">.</span><span class="n">LightningStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="examples">Examples</h3>
+
+<p>Let’s walk through some examples of Python gRPC clients. These examples assume
+that you have at least two <code class="highlighter-rouge">lnd</code> nodes running, the RPC location of one of which
+is at the default <code class="highlighter-rouge">localhost:10009</code>, with an open channel between the two nodes.</p>
+
+<h4 id="simple-rpc">Simple RPC</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Retrieve and display the wallet balance
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">stub</span><span class="o">.</span><span class="n">WalletBalance</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">WalletBalanceRequest</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">total_balance</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="response-streaming-rpc">Response-streaming RPC</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">request</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">InvoiceSubscription</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">invoice</span> <span class="ow">in</span> <span class="n">stub</span><span class="o">.</span><span class="n">SubscribeInvoices</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">invoice</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now, create an invoice for your node at <code class="highlighter-rouge">localhost:10009</code>and send a payment to
+it from another node.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>lncli addinvoice <span class="nt">--amt</span><span class="o">=</span>100
+<span class="o">{</span>
+	<span class="s2">"r_hash"</span>: &lt;R_HASH&gt;,
+	<span class="s2">"pay_req"</span>: &lt;PAY_REQ&gt;
+<span class="o">}</span>
+<span class="nv">$ </span>lncli sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;PAY_REQ&gt;
+</code></pre></div></div>
+
+<p>Your Python console should now display the details of the recently satisfied
+invoice.</p>
+
+<h4 id="bidirectional-streaming-rpc">Bidirectional-streaming RPC</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+
+<span class="k">def</span> <span class="nf">request_generator</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">amt</span><span class="p">):</span>
+      <span class="c1"># Initialization code here
+</span>      <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">print</span><span class="p">(</span><span class="s">"Starting up"</span><span class="p">)</span>
+      <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+          <span class="n">request</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">SendRequest</span><span class="p">(</span>
+              <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span>
+              <span class="n">amt</span><span class="o">=</span><span class="n">amt</span><span class="p">,</span>
+          <span class="p">)</span>
+          <span class="k">yield</span> <span class="n">request</span>
+          <span class="c1"># Alter parameters here
+</span>          <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+          <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Outputs from lncli are hex-encoded
+</span><span class="n">dest_hex</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">RECEIVER_ID_PUBKEY</span><span class="o">&gt;</span>
+<span class="n">dest_bytes</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">dest_hex</span><span class="p">,</span> <span class="s">'hex'</span><span class="p">)</span>
+
+<span class="n">request_iterable</span> <span class="o">=</span> <span class="n">request_generator</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="n">dest_bytes</span><span class="p">,</span> <span class="n">amt</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">payment</span> <span class="ow">in</span> <span class="n">stub</span><span class="o">.</span><span class="n">SendPayment</span><span class="p">(</span><span class="n">request_iterable</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">payment</span><span class="p">)</span>
+</code></pre></div></div>
+<p>This example will send a payment of 100 satoshis every 2 seconds.</p>
+
+<h4 id="using-macaroons">Using Macaroons</h4>
+
+<p>To authenticate using macaroons you need to include the macaroon in the metadata of the request.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">codecs</span>
+
+<span class="c1"># Lnd admin macaroon is at ~/.lnd/data/chain/bitcoin/simnet/admin.macaroon on Linux and
+# ~/Library/Application Support/Lnd/data/chain/bitcoin/simnet/admin.macaroon on Mac
+</span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">'~/.lnd/data/chain/bitcoin/simnet/admin.macaroon'</span><span class="p">),</span> <span class="s">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">macaroon_bytes</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">macaroon</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">macaroon_bytes</span><span class="p">,</span> <span class="s">'hex'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The simplest approach to use the macaroon is to include the metadata in each request as shown below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">stub</span><span class="o">.</span><span class="n">GetInfo</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">GetInfoRequest</span><span class="p">(),</span> <span class="n">metadata</span><span class="o">=</span><span class="p">[(</span><span class="s">'macaroon'</span><span class="p">,</span> <span class="n">macaroon</span><span class="p">)])</span>
+</code></pre></div></div>
+
+<p>However, this can get tiresome to do for each request, so to avoid explicitly including the macaroon we can update the credentials to include it automatically.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">metadata_callback</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+    <span class="c1"># for more info see grpc docs
+</span>    <span class="n">callback</span><span class="p">([(</span><span class="s">'macaroon'</span><span class="p">,</span> <span class="n">macaroon</span><span class="p">)],</span> <span class="bp">None</span><span class="p">)</span>
+
+
+<span class="c1"># build ssl credentials using the cert the same as before
+</span><span class="n">cert_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_channel_credentials</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
+
+<span class="c1"># now build meta data credentials
+</span><span class="n">auth_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">metadata_call_credentials</span><span class="p">(</span><span class="n">metadata_callback</span><span class="p">)</span>
+
+<span class="c1"># combine the cert credentials and the macaroon auth credentials
+# such that every call is properly encrypted and authenticated
+</span><span class="n">combined_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">composite_channel_credentials</span><span class="p">(</span><span class="n">cert_creds</span><span class="p">,</span> <span class="n">auth_creds</span><span class="p">)</span>
+
+<span class="c1"># finally pass in the combined credentials when creating a channel
+</span><span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">secure_channel</span><span class="p">(</span><span class="s">'localhost:10009'</span><span class="p">,</span> <span class="n">combined_creds</span><span class="p">)</span>
+<span class="n">stub</span> <span class="o">=</span> <span class="n">lnrpc</span><span class="o">.</span><span class="n">LightningStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+<span class="c1"># now every call will be made with the macaroon already included
+</span><span class="n">stub</span><span class="o">.</span><span class="n">GetInfo</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">GetInfoRequest</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>With the above, you should have all the <code class="highlighter-rouge">lnd</code> related <code class="highlighter-rouge">gRPC</code> dependencies
+installed locally into your virtual environment. In order to get up to speed
+with <code class="highlighter-rouge">protofbuf</code> usage from Python, see <a href="https://developers.google.com/protocol-buffers/docs/pythontutorial">this official <code class="highlighter-rouge">protobuf</code> tutorial for
+Python</a>.
+Additionally, <a href="http://www.grpc.io/docs/tutorials/basic/python.html">this official gRPC
+resource</a> provides more
+details around how to drive <code class="highlighter-rouge">gRPC</code> from Python.</p>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Lightning Network Developers</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Max Fang
+            
+            </li>
+            
+            <li>
+              <a href="mailto:max@lightning.engineering">
+                <span>max@lightning.engineering</span>
+              </a>
+            </li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/lightningnetwork/lnd"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">lnd</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/lightning"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">lightning</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Developer resources and documentation for the Lightning Network Daemon.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
