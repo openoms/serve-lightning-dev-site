@@ -87,7 +87,7 @@ installation instructions you’ll need to complete is “Installing btcd.”</p
 network to include additional nodes <code class="highlighter-rouge">David</code>, <code class="highlighter-rouge">Eve</code>, etc. by simply running more
 local <code class="highlighter-rouge">lnd</code> instances.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   (1)                        (1)                         (1)
+<div class="highlighter-rouge"><pre class="highlight"><code>   (1)                        (1)                         (1)
 + ----- +                   + --- +                   + ------- +
 | Alice | &lt;--- channel ---&gt; | Bob | &lt;--- channel ---&gt; | Charlie |
 + ----- +                   + --- +                   + ------- +
@@ -98,7 +98,8 @@ local <code class="highlighter-rouge">lnd</code> instances.</p>
                       + --------------- +
                       | BTC/LTC network | &lt;--- (2)
                       + --------------- +
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h3 id="understanding-the-components">Understanding the components</h3>
 
@@ -141,8 +142,9 @@ workflow.</p>
 
 <p>Let’s start by running btcd, if you don’t have it up already. Open up a new
 terminal window, ensure you have your <code class="highlighter-rouge">$GOPATH</code> set, and run:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcd <span class="nt">--txindex</span> <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>btcd --txindex --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek
+</code></pre>
+</div>
 <p>(Note: this tutorial requires opening quite a few terminal windows. It may be
 convenient to use multiplexers such as tmux or screen if you’re familiar with
 them.)</p>
@@ -168,17 +170,18 @@ folders to store the state for alice, bob, and charlie, and run all of our
 <code class="highlighter-rouge">lnd</code> nodes on different <code class="highlighter-rouge">localhost</code> ports instead of using
 <a href="/guides/docker/">Docker</a> to make our networking a bit easier.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Create our development space</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Create our development space</span>
 <span class="nb">cd</span> <span class="nv">$GOPATH</span>
-<span class="nb">mkdir </span>dev
+mkdir dev
 <span class="nb">cd </span>dev
 
 <span class="c"># Create folders for each of our nodes</span>
-<span class="nb">mkdir </span>alice bob charlie
-</code></pre></div></div>
+mkdir alice bob charlie
+</code></pre>
+</div>
 
 <p>The directory structure should now look like this:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>tree <span class="nv">$GOPATH</span> <span class="nt">-L</span> 2
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">$ </span>tree <span class="nv">$GOPATH</span> -L 2
 
 ├── bin
 │   └── ...
@@ -192,12 +195,14 @@ folders to store the state for alice, bob, and charlie, and run all of our
 │   └── ...
 └── src
     └── ...
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Start up the Alice node from within the <code class="highlighter-rouge">alice</code> directory:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/alice
-alice<span class="nv">$ </span>lnd <span class="nt">--rpclisten</span><span class="o">=</span>localhost:10001 <span class="nt">--listen</span><span class="o">=</span>localhost:10011 <span class="nt">--restlisten</span><span class="o">=</span>localhost:8001 <span class="nt">--datadir</span><span class="o">=</span>data <span class="nt">--logdir</span><span class="o">=</span>log <span class="nt">--debuglevel</span><span class="o">=</span>info <span class="nt">--bitcoin</span>.simnet <span class="nt">--bitcoin</span>.active <span class="nt">--bitcoin</span>.node<span class="o">=</span>btcd <span class="nt">--btcd</span>.rpcuser<span class="o">=</span>kek <span class="nt">--btcd</span>.rpcpass<span class="o">=</span>kek 
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/alice
+<span class="gp">alice$ </span>lnd --rpclisten<span class="o">=</span>localhost:10001 --listen<span class="o">=</span>localhost:10011 --restlisten<span class="o">=</span>localhost:8001 --datadir<span class="o">=</span>data --logdir<span class="o">=</span>log --debuglevel<span class="o">=</span>info --bitcoin.simnet --bitcoin.active --bitcoin.node<span class="o">=</span>btcd --btcd.rpcuser<span class="o">=</span>kek --btcd.rpcpass<span class="o">=</span>kek 
+</code></pre>
+</div>
 <p>The Alice node should now be running and displaying output ending with a line
 beginning with “Waiting for wallet encryption password.”</p>
 
@@ -237,20 +242,22 @@ there is never a conflict.</p>
 <p>Keep in mind that for each additional terminal window you set, you will need to
 set <code class="highlighter-rouge">$GOPATH</code> and include <code class="highlighter-rouge">$GOPATH/bin</code> in your <code class="highlighter-rouge">PATH</code>. Consider creating a
 setup script that includes the following lines:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">GOPATH</span><span class="o">=</span>~/gocode <span class="c"># if you exactly followed the install guide</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">export </span><span class="nv">GOPATH</span><span class="o">=</span>~/gocode <span class="c"># if you exactly followed the install guide</span>
 <span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$GOPATH</span>/bin
-</code></pre></div></div>
+</code></pre>
+</div>
 <p>and run it every time you start a new terminal window working on <code class="highlighter-rouge">lnd</code>.</p>
 
 <p>Run Bob and Charlie:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># In a new terminal window</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># In a new terminal window</span>
 <span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/bob
-bob<span class="nv">$ </span>lnd <span class="nt">--rpclisten</span><span class="o">=</span>localhost:10002 <span class="nt">--listen</span><span class="o">=</span>localhost:10012 <span class="nt">--restlisten</span><span class="o">=</span>localhost:8002 <span class="nt">--datadir</span><span class="o">=</span>data <span class="nt">--logdir</span><span class="o">=</span>log <span class="nt">--debuglevel</span><span class="o">=</span>info <span class="nt">--bitcoin</span>.simnet <span class="nt">--bitcoin</span>.active <span class="nt">--bitcoin</span>.node<span class="o">=</span>btcd <span class="nt">--btcd</span>.rpcuser<span class="o">=</span>kek <span class="nt">--btcd</span>.rpcpass<span class="o">=</span>kek 
+<span class="gp">bob$ </span>lnd --rpclisten<span class="o">=</span>localhost:10002 --listen<span class="o">=</span>localhost:10012 --restlisten<span class="o">=</span>localhost:8002 --datadir<span class="o">=</span>data --logdir<span class="o">=</span>log --debuglevel<span class="o">=</span>info --bitcoin.simnet --bitcoin.active --bitcoin.node<span class="o">=</span>btcd --btcd.rpcuser<span class="o">=</span>kek --btcd.rpcpass<span class="o">=</span>kek 
 
 <span class="c"># In another terminal window</span>
 <span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/charlie
-charlie<span class="nv">$ </span>lnd <span class="nt">--rpclisten</span><span class="o">=</span>localhost:10003 <span class="nt">--listen</span><span class="o">=</span>localhost:10013 <span class="nt">--restlisten</span><span class="o">=</span>localhost:8003 <span class="nt">--datadir</span><span class="o">=</span>data <span class="nt">--logdir</span><span class="o">=</span>log <span class="nt">--debuglevel</span><span class="o">=</span>info <span class="nt">--bitcoin</span>.simnet <span class="nt">--bitcoin</span>.active <span class="nt">--bitcoin</span>.node<span class="o">=</span>btcd <span class="nt">--btcd</span>.rpcuser<span class="o">=</span>kek <span class="nt">--btcd</span>.rpcpass<span class="o">=</span>kek
-</code></pre></div></div>
+<span class="gp">charlie$ </span>lnd --rpclisten<span class="o">=</span>localhost:10003 --listen<span class="o">=</span>localhost:10013 --restlisten<span class="o">=</span>localhost:8003 --datadir<span class="o">=</span>data --logdir<span class="o">=</span>log --debuglevel<span class="o">=</span>info --bitcoin.simnet --bitcoin.active --bitcoin.node<span class="o">=</span>btcd --btcd.rpcuser<span class="o">=</span>kek --btcd.rpcpass<span class="o">=</span>kek
+</code></pre>
+</div>
 
 <h3 id="configuring-lndconf">Configuring lnd.conf</h3>
 
@@ -267,7 +274,7 @@ overwrite the <code class="highlighter-rouge">lnd.conf</code> option if applicab
 
 <p>Here is an example <code class="highlighter-rouge">lnd.conf</code> that can save us from re-specifying a bunch of
 command line options:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>Application Options]
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="o">[</span>Application Options]
 <span class="nv">datadir</span><span class="o">=</span>data
 <span class="nv">logdir</span><span class="o">=</span>log
 <span class="nv">debuglevel</span><span class="o">=</span>info
@@ -280,13 +287,15 @@ bitcoin.node<span class="o">=</span>btcd
 <span class="o">[</span>btcd]
 btcd.rpcuser<span class="o">=</span>kek
 btcd.rpcpass<span class="o">=</span>kek
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Now, when we start nodes, we only have to type</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lnd <span class="nt">--rpclisten</span><span class="o">=</span>localhost:10001 <span class="nt">--listen</span><span class="o">=</span>localhost:10011 <span class="nt">--restlisten</span><span class="o">=</span>localhost:8001
-bob<span class="nv">$ </span>lnd <span class="nt">--rpclisten</span><span class="o">=</span>localhost:10002 <span class="nt">--listen</span><span class="o">=</span>localhost:10012 <span class="nt">--restlisten</span><span class="o">=</span>localhost:8002
-charlie<span class="nv">$ </span>lnd <span class="nt">--rpclisten</span><span class="o">=</span>localhost:10003 <span class="nt">--listen</span><span class="o">=</span>localhost:10013 <span class="nt">--restlisten</span><span class="o">=</span>localhost:8003
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lnd --rpclisten<span class="o">=</span>localhost:10001 --listen<span class="o">=</span>localhost:10011 --restlisten<span class="o">=</span>localhost:8001
+<span class="gp">bob$ </span>lnd --rpclisten<span class="o">=</span>localhost:10002 --listen<span class="o">=</span>localhost:10012 --restlisten<span class="o">=</span>localhost:8002
+<span class="gp">charlie$ </span>lnd --rpclisten<span class="o">=</span>localhost:10003 --listen<span class="o">=</span>localhost:10013 --restlisten<span class="o">=</span>localhost:8003
+</code></pre>
+</div>
 <p>etc.</p>
 
 <h3 id="working-with-lncli-and-authentication">Working with lncli and authentication</h3>
@@ -313,9 +322,10 @@ starting the Alice <code class="highlighter-rouge">lnd</code> node.</p>
 
 <p>Open up a new terminal window, set <code class="highlighter-rouge">$GOPATH</code> and include <code class="highlighter-rouge">$GOPATH/bin</code> in your
 <code class="highlighter-rouge">PATH</code> as usual. Let’s create Alice’s wallet and set her passphrase:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/alice
-alice<span class="nv">$ </span>lncli <span class="nt">--rpcserver</span><span class="o">=</span>localhost:10001 <span class="nt">--macaroonpath</span><span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon create
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/alice
+<span class="gp">alice$ </span>lncli --rpcserver<span class="o">=</span>localhost:10001 --macaroonpath<span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon create
+</code></pre>
+</div>
 <p>You’ll be asked to input and confirm a wallet password for Alice, which must be
 longer than 8 characters. You also have the option to add a passphrase to your
 cipher seed. For now, just skip this step by entering “n” when prompted about
@@ -323,8 +333,9 @@ whether you have an existing mnemonic, and pressing enter to proceed without the
 passphrase.</p>
 
 <p>You can now request some basic information as follows:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli <span class="nt">--rpcserver</span><span class="o">=</span>localhost:10001 <span class="nt">--macaroonpath</span><span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon getinfo
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lncli --rpcserver<span class="o">=</span>localhost:10001 --macaroonpath<span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon getinfo
+</code></pre>
+</div>
 <p><code class="highlighter-rouge">lncli</code> just made an RPC call to the Alice <code class="highlighter-rouge">lnd</code> node. This is a good way to
 test if your nodes are up and running and <code class="highlighter-rouge">lncli</code> is functioning properly. Note
 that in future sessions you may need to call <code class="highlighter-rouge">lncli unlock</code> to unlock the node
@@ -333,30 +344,33 @@ with the password you just set.</p>
 <p>Open up new terminal windows and do the same for Bob and Charlie. <code class="highlighter-rouge">alice$</code> or
 <code class="highlighter-rouge">bob$</code> denotes running the command from the Alice or Bob <code class="highlighter-rouge">lncli</code> window
 respectively.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># In a new terminal window, setting $GOPATH, etc.</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># In a new terminal window, setting $GOPATH, etc.</span>
 <span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/bob
-bob<span class="nv">$ </span>lncli <span class="nt">--rpcserver</span><span class="o">=</span>localhost:10002 <span class="nt">--macaroonpath</span><span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon create
+<span class="gp">bob$ </span>lncli --rpcserver<span class="o">=</span>localhost:10002 --macaroonpath<span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon create
 <span class="c"># Note that you'll have to enter an 8+ character password and "n" for the mnemonic.</span>
 
 <span class="c"># In a new terminal window:</span>
 <span class="nb">cd</span> <span class="nv">$GOPATH</span>/dev/charlie
-charlie<span class="nv">$ </span>lncli <span class="nt">--rpcserver</span><span class="o">=</span>localhost:10003 <span class="nt">--macaroonpath</span><span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon create
+<span class="gp">charlie$ </span>lncli --rpcserver<span class="o">=</span>localhost:10003 --macaroonpath<span class="o">=</span>data/chain/bitcoin/simnet/admin.macaroon create
 <span class="c"># Note that you'll have to enter an 8+ character password and "n" for the mnemonic.</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>To avoid typing the <code class="highlighter-rouge">--rpcserver=localhost:1000X</code> and <code class="highlighter-rouge">--macaroonpath</code> flag
 every time, we can set some aliases. Add the following to your <code class="highlighter-rouge">.bashrc</code>:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">alias </span>lncli-alice<span class="o">=</span><span class="s2">"lncli --rpcserver=localhost:10001 --macaroonpath=data/chain/bitcoin/simnet/admin.macaroon"</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">alias </span>lncli-alice<span class="o">=</span><span class="s2">"lncli --rpcserver=localhost:10001 --macaroonpath=data/chain/bitcoin/simnet/admin.macaroon"</span>
 <span class="nb">alias </span>lncli-bob<span class="o">=</span><span class="s2">"lncli --rpcserver=localhost:10002 --macaroonpath=data/chain/bitcoin/simnet/admin.macaroon"</span>
 <span class="nb">alias </span>lncli-charlie<span class="o">=</span><span class="s2">"lncli --rpcserver=localhost:10003 --macaroonpath=data/chain/bitcoin/simnet/admin.macaroon"</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>To make sure this was applied to all of your current terminal windows, rerun
 your <code class="highlighter-rouge">.bashrc</code> file:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span><span class="nb">source</span> ~/.bashrc
-bob<span class="nv">$ </span><span class="nb">source</span> ~/.bashrc
-charlie<span class="nv">$ </span><span class="nb">source</span> ~/.bashrc
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span><span class="nb">source</span> ~/.bashrc
+<span class="gp">bob$ </span><span class="nb">source</span> ~/.bashrc
+<span class="gp">charlie$ </span><span class="nb">source</span> ~/.bashrc
+</code></pre>
+</div>
 <p>For simplicity, the rest of the tutorial will assume that this step was
 complete.</p>
 
@@ -370,23 +384,25 @@ complete.</p>
 stores Alice’s on-chain balance. <code class="highlighter-rouge">np2wkh</code> specifes the type of address and
 stands for Pay to Nested Witness Key Hash.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli-alice newaddress np2wkh
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lncli-alice newaddress np2wkh
 <span class="o">{</span>
     <span class="s2">"address"</span>: &lt;ALICE_ADDRESS&gt;
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>And for Bob and Charlie:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bob<span class="nv">$ </span>lncli-bob newaddress np2wkh
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">bob$ </span>lncli-bob newaddress np2wkh
 <span class="o">{</span>
     <span class="s2">"address"</span>: &lt;BOB_ADDRESS&gt;
 <span class="o">}</span>
 
-charlie<span class="nv">$ </span>lncli-charlie newaddress np2wkh
+<span class="gp">charlie$ </span>lncli-charlie newaddress np2wkh
 <span class="o">{</span>
     <span class="s2">"address"</span>: &lt;CHARLIE_ADDRESS&gt;
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h3 id="funding-alice">Funding Alice</h3>
 
@@ -395,44 +411,49 @@ for Alice, Bob, and Charlie. Now, we will get some practice working with <code c
 and fund these addresses with some <code class="highlighter-rouge">simnet</code> Bitcoin.</p>
 
 <p>Quit btcd and re-run it, setting Alice as the recipient of all mining rewards:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcd <span class="nt">--simnet</span> <span class="nt">--txindex</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek <span class="nt">--miningaddr</span><span class="o">=</span>&lt;ALICE_ADDRESS&gt;
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>btcd --simnet --txindex --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek --miningaddr<span class="o">=</span>&lt;ALICE_ADDRESS&gt;
+</code></pre>
+</div>
 
 <p>Generate 400 blocks, so that Alice gets the reward. We need at least 100 blocks
 because coinbase funds can’t be spent until after 100 confirmations, and we need
 about 300 to activate segwit. In a new window with <code class="highlighter-rouge">$GOPATH</code> and <code class="highlighter-rouge">$PATH</code> set:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>btcctl <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek generate 400
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>btcctl --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek generate 400
+</code></pre>
+</div>
 
 <p>Check that segwit is active:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcctl <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek getblockchaininfo | <span class="nb">grep</span> <span class="nt">-A</span> 1 segwit
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>btcctl --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek getblockchaininfo | grep -A 1 segwit
+</code></pre>
+</div>
 
 <p>Check Alice’s wallet balance.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli-alice walletbalance
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lncli-alice walletbalance
+</code></pre>
+</div>
 
 <p>It’s no fun if only Alice has money. Let’s give some to Charlie as well.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Quit the btcd process that was previously started with Alice's mining address,</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Quit the btcd process that was previously started with Alice's mining address,</span>
 <span class="c"># and then restart it with:</span>
-btcd <span class="nt">--txindex</span> <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek <span class="nt">--miningaddr</span><span class="o">=</span>&lt;CHARLIE_ADDRESS&gt;
+btcd --txindex --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek --miningaddr<span class="o">=</span>&lt;CHARLIE_ADDRESS&gt;
 
 <span class="c"># Generate more blocks</span>
-btcctl <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek generate 100
+btcctl --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek generate 100
 
 <span class="c"># Check Charlie's balance</span>
-charlie<span class="nv">$ </span>lncli-charlie walletbalance
-</code></pre></div></div>
+<span class="gp">charlie$ </span>lncli-charlie walletbalance
+</code></pre>
+</div>
 
 <h3 id="creating-the-p2p-network">Creating the P2P Network</h3>
 <p>Now that Alice and Charlie have some simnet Bitcoin, let’s start connecting
 them together.</p>
 
 <p>Connect Alice to Bob:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Get Bob's identity pubkey:</span>
-bob<span class="nv">$ </span>lncli-bob getinfo
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Get Bob's identity pubkey:</span>
+<span class="gp">bob$ </span>lncli-bob getinfo
 <span class="o">{</span>
-<span class="nt">---</span><span class="o">&gt;</span><span class="s2">"identity_pubkey"</span>: &lt;BOB_PUBKEY&gt;,
+---&gt;<span class="s2">"identity_pubkey"</span>: &lt;BOB_PUBKEY&gt;,
     <span class="s2">"alias"</span>: <span class="s2">""</span>,
     <span class="s2">"num_pending_channels"</span>: 0,
     <span class="s2">"num_active_channels"</span>: 0,
@@ -451,17 +472,18 @@ bob<span class="nv">$ </span>lncli-bob getinfo
 <span class="o">}</span>
 
 <span class="c"># Connect Alice and Bob together</span>
-alice<span class="nv">$ </span>lncli-alice connect &lt;BOB_PUBKEY&gt;@localhost:10012
+<span class="gp">alice$ </span>lncli-alice connect &lt;BOB_PUBKEY&gt;@localhost:10012
 <span class="o">{</span>
 
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 <p>Notice that <code class="highlighter-rouge">localhost:10012</code> corresponds to the <code class="highlighter-rouge">--listen=localhost:10012</code> flag we set
 when starting the Bob <code class="highlighter-rouge">lnd</code> node.</p>
 
 <p>Let’s check that Alice and Bob are now aware of each other.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check that Alice has added Bob as a peer:</span>
-alice<span class="nv">$ </span>lncli-alice listpeers
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Check that Alice has added Bob as a peer:</span>
+<span class="gp">alice$ </span>lncli-alice listpeers
 <span class="o">{</span>
     <span class="s2">"peers"</span>: <span class="o">[</span>
         <span class="o">{</span>
@@ -478,7 +500,7 @@ alice<span class="nv">$ </span>lncli-alice listpeers
 <span class="o">}</span>
 
 <span class="c"># Check that Bob has added Alice as a peer:</span>
-bob<span class="nv">$ </span>lncli-bob listpeers
+<span class="gp">bob$ </span>lncli-bob listpeers
 <span class="o">{</span>
     <span class="s2">"peers"</span>: <span class="o">[</span>
         <span class="o">{</span>
@@ -493,11 +515,13 @@ bob<span class="nv">$ </span>lncli-bob listpeers
         <span class="o">}</span>
     <span class="o">]</span>
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Finish up the P2P network by connecting Bob to Charlie:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>charlie<span class="nv">$ </span>lncli-charlie connect &lt;BOB_PUBKEY&gt;@localhost:10012
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">charlie$ </span>lncli-charlie connect &lt;BOB_PUBKEY&gt;@localhost:10012
+</code></pre>
+</div>
 
 <h3 id="setting-up-lightning-network">Setting up Lightning Network</h3>
 
@@ -505,8 +529,9 @@ bob<span class="nv">$ </span>lncli-bob listpeers
 to Bob, and Bob to Charlie.</p>
 
 <p>First, let’s open the Alice&lt;–&gt;Bob channel.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli-alice openchannel <span class="nt">--node_key</span><span class="o">=</span>&lt;BOB_PUBKEY&gt; <span class="nt">--local_amt</span><span class="o">=</span>1000000
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lncli-alice openchannel --node_key<span class="o">=</span>&lt;BOB_PUBKEY&gt; --local_amt<span class="o">=</span>1000000
+</code></pre>
+</div>
 <ul>
   <li><code class="highlighter-rouge">--local_amt</code> specifies the amount of money that Alice will commit to the
 channel.  To see the full list of options, you can try <code class="highlighter-rouge">lncli openchannel
@@ -514,11 +539,12 @@ channel.  To see the full list of options, you can try <code class="highlighter-
 </ul>
 
 <p>We now need to mine six blocks so that the channel is considered valid:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcctl <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek generate 6
-</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>btcctl --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek generate 6
+</code></pre>
+</div>
 
 <p>Check that Alice&lt;–&gt;Bob channel was created:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli-alice listchannels
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lncli-alice listchannels
 <span class="o">{</span>
     <span class="s2">"channels"</span>: <span class="o">[</span>
         <span class="o">{</span>
@@ -543,7 +569,8 @@ channel.  To see the full list of options, you can try <code class="highlighter-
         <span class="o">}</span>
     <span class="o">]</span>
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h3 id="sending-single-hop-payments">Sending single hop payments</h3>
 
@@ -551,16 +578,17 @@ channel.  To see the full list of options, you can try <code class="highlighter-
 Alice to Bob.</p>
 
 <p>First, Bob will need to generate an invoice:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bob<span class="nv">$ </span>lncli-bob addinvoice <span class="nt">--amt</span><span class="o">=</span>10000
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">bob$ </span>lncli-bob addinvoice --amt<span class="o">=</span>10000
 <span class="o">{</span>
         <span class="s2">"r_hash"</span>: <span class="s2">"&lt;a_random_rhash_value&gt;"</span>,
         <span class="s2">"pay_req"</span>: <span class="s2">"&lt;encoded_invoice&gt;"</span>,
         <span class="s2">"add_index"</span>: 1
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Send the payment from Alice to Bob:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli-alice sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;encoded_invoice&gt;
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lncli-alice sendpayment --pay_req<span class="o">=</span>&lt;encoded_invoice&gt;
 <span class="o">{</span>
 	<span class="s2">"payment_error"</span>: <span class="s2">""</span>,
 	<span class="s2">"payment_preimage"</span>: <span class="s2">"baf6929fc95b3824fb774a4b75f6c8a1ad3aaef04efbf26cc064904729a21e28"</span>,
@@ -581,46 +609,49 @@ Alice to Bob.</p>
 <span class="o">}</span>
 
 <span class="c"># Check that Alice's channel balance was decremented accordingly:</span>
-alice<span class="nv">$ </span>lncli-alice listchannels
+<span class="gp">alice$ </span>lncli-alice listchannels
 
 <span class="c"># Check that Bob's channel was credited with the payment amount:</span>
-bob<span class="nv">$ </span>lncli-bob listchannels
-</code></pre></div></div>
+<span class="gp">bob$ </span>lncli-bob listchannels
+</code></pre>
+</div>
 
 <h3 id="multi-hop-payments">Multi-hop payments</h3>
 
 <p>Now that we know how to send single-hop payments, sending multi hop payments is
 not that much more difficult. Let’s set up a channel from Bob&lt;–&gt;Charlie:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>charlie<span class="nv">$ </span>lncli-charlie openchannel <span class="nt">--node_key</span><span class="o">=</span>&lt;BOB_PUBKEY&gt; <span class="nt">--local_amt</span><span class="o">=</span>800000 <span class="nt">--push_amt</span><span class="o">=</span>200000
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">charlie$ </span>lncli-charlie openchannel --node_key<span class="o">=</span>&lt;BOB_PUBKEY&gt; --local_amt<span class="o">=</span>800000 --push_amt<span class="o">=</span>200000
 
 <span class="c"># Mine the channel funding tx</span>
-btcctl <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek generate 6
-</code></pre></div></div>
+btcctl --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek generate 6
+</code></pre>
+</div>
 
 <p>Note that this time, we supplied the <code class="highlighter-rouge">--push_amt</code> argument, which specifies the
 amount of money we want the other party to have at the first channel state.</p>
 
 <p>Let’s make a payment from Alice to Charlie by routing through Bob:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>charlie<span class="nv">$ </span>lncli-charlie addinvoice <span class="nt">--amt</span><span class="o">=</span>10000
-alice<span class="nv">$ </span>lncli-alice sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;encoded_invoice&gt;
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">charlie$ </span>lncli-charlie addinvoice --amt<span class="o">=</span>10000
+<span class="gp">alice$ </span>lncli-alice sendpayment --pay_req<span class="o">=</span>&lt;encoded_invoice&gt;
 
 <span class="c"># Check that Charlie's channel was credited with the payment amount (e.g. that</span>
 <span class="c"># the `remote_balance` has been decremented by 10000)</span>
-charlie<span class="nv">$ </span>lncli-charlie listchannels
-</code></pre></div></div>
+<span class="gp">charlie$ </span>lncli-charlie listchannels
+</code></pre>
+</div>
 
 <h3 id="closing-channels">Closing channels</h3>
 
 <p>For practice, let’s try closing a channel. We will reopen it in the next stage
 of the tutorial.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice<span class="nv">$ </span>lncli-alice listchannels
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">alice$ </span>lncli-alice listchannels
 <span class="o">{</span>
     <span class="s2">"channels"</span>: <span class="o">[</span>
         <span class="o">{</span>
             <span class="s2">"active"</span>: <span class="nb">true</span>,
             <span class="s2">"remote_pubkey"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
-       <span class="nt">----</span><span class="o">&gt;</span><span class="s2">"channel_point"</span>: <span class="s2">"3511ae8a52c97d957eaf65f828504e68d0991f0276adff94c6ba91c7f6cd4275:0"</span>,
+       ----&gt;<span class="s2">"channel_point"</span>: <span class="s2">"3511ae8a52c97d957eaf65f828504e68d0991f0276adff94c6ba91c7f6cd4275:0"</span>,
             <span class="s2">"chan_id"</span>: <span class="s2">"1337006139441152"</span>,
             <span class="s2">"capacity"</span>: <span class="s2">"1005000"</span>,
             <span class="s2">"local_balance"</span>: <span class="s2">"990000"</span>,
@@ -632,26 +663,28 @@ of the tutorial.</p>
         <span class="o">}</span>
     <span class="o">]</span>
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>The Channel point consists of two numbers separated by a colon, which uniquely
 identifies the channel. The first number is <code class="highlighter-rouge">funding_txid</code> and the second
 number is <code class="highlighter-rouge">output_index</code>.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Close the Alice&lt;--&gt;Bob channel from Alice's side.</span>
-alice<span class="nv">$ </span>lncli-alice closechannel <span class="nt">--funding_txid</span><span class="o">=</span>&lt;funding_txid&gt; <span class="nt">--output_index</span><span class="o">=</span>&lt;output_index&gt;
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Close the Alice&lt;--&gt;Bob channel from Alice's side.</span>
+<span class="gp">alice$ </span>lncli-alice closechannel --funding_txid<span class="o">=</span>&lt;funding_txid&gt; --output_index<span class="o">=</span>&lt;output_index&gt;
 
 <span class="c"># Mine a block including the channel close transaction to close the channel:</span>
-btcctl <span class="nt">--simnet</span> <span class="nt">--rpcuser</span><span class="o">=</span>kek <span class="nt">--rpcpass</span><span class="o">=</span>kek generate 1
+btcctl --simnet --rpcuser<span class="o">=</span>kek --rpcpass<span class="o">=</span>kek generate 1
 
 <span class="c"># Check that Bob's on-chain balance was credited by his settled amount in the</span>
 <span class="c"># channel. Recall that Bob previously had no on-chain Bitcoin:</span>
-bob<span class="nv">$ </span>lncli-bob walletbalance
+<span class="gp">bob$ </span>lncli-bob walletbalance
 <span class="o">{</span>
     <span class="s2">"total_balance"</span>: <span class="s2">"20001"</span>,
     <span class="s2">"confirmed_balance"</span>: <span class="s2">"20001"</span>,
     <span class="s2">"unconfirmed_balance"</span>: <span class="s2">"0"</span>
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>At this point, you’ve learned how to work with <code class="highlighter-rouge">btcd</code>, <code class="highlighter-rouge">btcctl</code>, <code class="highlighter-rouge">lnd</code>, and
 <code class="highlighter-rouge">lncli</code>. In <a href="/tutorial/02-web-client">Stage 2</a>, we will learn how to set up and

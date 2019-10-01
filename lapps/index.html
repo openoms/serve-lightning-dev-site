@@ -76,27 +76,31 @@ compatible apps built on Eclair and c-lightning.</p>
 
 <h3 id="wallets">Wallets</h3>
 
-<h4 id="lightning-desktop-app-by-lightning-labs"><a href="https://github.com/lightninglabs/lightning-app">Lightning Desktop App</a> by Lightning Labs:</h4>
-
-<p>The Lightning Desktop App is a cross-platform wallet powered by <code class="highlighter-rouge">lnd</code>. This
-application is temporarily down as we upgrade it to be compliant with the LND
-beta release. See the <a href="https://blog.lightning.engineering/announcement/2017/10/12/test-blitz.html">original
-announcement</a>
+<h4 id="lightning-app-by-lightning-labs"><a href="https://github.com/lightninglabs/lightning-app">Lightning App</a> by Lightning Labs:</h4>
+<p>The Lightning App is a cross-platform wallet powered by <code class="highlighter-rouge">lnd</code>. See the 
+<a href="https://blog.lightning.engineering/announcement/2019/04/23mainnet-app.html">mainnet for desktop</a>
+and <a href="https://blog.lightning.engineering/announcement/2019/06/19mobile-app.html">mobile announcement</a>
 for more information, or checkout the
 <a href="https://github.com/lightninglabs/lightning-app">code</a> or
-<a href="https://github.com/lightninglabs/lightning-app/releases">releases</a> <img src="/assets/lapps/lnd_desktop_app.png" alt="Screenshot of Lightning Desktop App Channel View" style="max-width: 80%;" /></p>
+<a href="https://github.com/lightninglabs/lightning-app/releases">releases</a></p>
+
+<p><img src="/assets/lapps/lnd_desktop_app.png" alt="Screenshot of Lightning Desktop App" style="max-width: 80%;" /></p>
 
 <h4 id="zap-wallet-by-jack-mallers"><a href="https://zap.jackmallers.com/">Zap</a> Wallet by Jack Mallers</h4>
-<p>Currently in Beta, the Zap wallet is a mobile and desktop app focused on ease of
+<p>The Zap wallet is a mobile and desktop app focused on ease of
 use and general user experience.
 Check out the <a href="https://zap.jackmallers.com/">Zap website</a> or read the code on
-<a href="https://github.com/lightninglabs/lightning-app/releases">Github</a></p>
+<a href="https://github.com/LN-Zap">Github</a></p>
 
 <p><img src="/assets/lapps/zap.png" alt="Zap Wallet payment request view" style="max-width: 80%;" /></p>
 
 <ul>
-  <li><a href="https://htlc.me/">HTLC.me</a>: Hosted wallet great for quickly trying out
+  <li><a href="https://htlc.me/">HTLC.me</a>: Hosted wallet great for quickly trying out 
 Lightning payments on the Bitcoin testnet.</li>
+  <li><a href="https://zeusln.app/">ZeusLN</a>:
+A mobile Bitcoin app for Lightning Network Daemon (lnd) node operators. Runs on Android and iOS.</li>
+  <li><a href="https://breez.technology/">Breez</a>: Breez is a Lightning Network mobile client and a hub.
+It provides a platform for simple, instantaneous bitcoin payments. Supports Android and iOS</li>
 </ul>
 
 <h3 id="integrations">Integrations</h3>
@@ -108,20 +112,14 @@ Bitcoin and Litecoin</li>
 micropayments
 <img src="/assets/lapps/yalls.png" alt="Screenshot of Yalls home view" style="max-width: 50%;" /></li>
   <li><a href="http://lncast.com/">LNCast</a>: Lightning Network Podcasts</li>
-  <li><a href="http://www.blockandjerrys.fun/">Block &amp; Jerry’s</a>: Virtual ice cream shop</li>
-  <li><a href="http://adwatcher.hopto.org:7777/">adWatcher Microservice</a>: Earn satoshis by
-watching ads or video content</li>
   <li><a href="https://www.bard.fun/">Bard</a>: Simple paywall for watching a music visualizer</li>
-  <li><a href="https://coinmall.com/">CoinMall</a>: Buy &amp; sell digital products with
-cryptocurrencies.</li>
-  <li><a href="http://freedns.lightning-network.ro/">Free DNS Demo</a>: Purchase subdomains
-with off-chain payments.</li>
-  <li><a href="https://HodlHodl.com">HodlHodl.com</a>: Peer-to-peer cryptocurrency exchange with        Lightning integration.</li>
-  <li><a href="http://zigzag.bitlum.io/">Zigzag</a>: Cryptocurrency trading using Lightning
+  <li><a href="https://hodlhodl.com/?set_asset=btcln">HodlHodl.com</a>: Peer-to-peer cryptocurrency
+exchange with Lightning integration.</li>
+  <li><a href="https://zigzag.io/#/">Zigzag.io</a>: Cryptocurrency trading using Lightning
 (custodial)</li>
   <li><a href="https://telegram.me/lntxbot">lntxbot</a> Lightning integration to Telegram with<br />
 tipping, send and receive and satellite API usage (custodial).</li>
-  <li><a href="https://paywall.link/">paywall.link</a> Put any website behind a paywall and pay with    Lightning.</li>
+  <li><a href="https://paywall.link/">paywall.link</a> Put any website behind a paywall and pay with Lightning.</li>
 </ul>
 
 <h3 id="lightning-network-explorers">Lightning network explorers</h3>
@@ -136,11 +134,10 @@ tipping, send and receive and satellite API usage (custodial).</li>
 <h3 id="protocol-services">Protocol Services</h3>
 
 <ul>
-  <li><a href="httos://faucet.lightning.community/">Lightning Faucet</a>: Receive free testnet
-Bitcoin (or <a href="https://ltc.faucet.lightning.community/">Litecoin</a>)</li>
+  <li><a href="https://faucet.lightning.community/">Lightning Faucet</a>: Receive free testnet
+Bitcoin</li>
   <li><a href="http://lnd.fun/">lnd.fun</a>: Panel for webmasters to manage their full lightning node.
 <img src="/assets/lapps/lnd.fun.png" alt="Screenshot of lnd.fun dashboard home view" style="max-width: 50%;" /></li>
-  <li><a href="https://stats.preimage.net/">kibana</a>: Visualization of the Lightning Network</li>
 </ul>
 
 <h3 id="developer-tools">Developer Tools</h3>
@@ -165,31 +162,39 @@ simple to use API implementations and converters between JSON and XML.</li>
 tips via the Lightning Network</li>
   <li><a href="https://github.com/CryptoFR/ln-tip-slack">Slack tipbot</a>: Custodial Slack
 tipbot</li>
-  <li><a href="http://cointippy.com/">CoinTippy</a>: Custodial tip bot available on
-multiple platforms, including Reddit, Twitter, and Telegram.</li>
-  <li><a href="https://github.com/robclark56/lightningPay-PHP">LightningPay-PHP</a>: PHP plugin for eCommerce website to add <em>Pay by Lightning</em> to accept order payments via the Lightning Network.</li>
+  <li><a href="https://github.com/robclark56/lightningPay-PHP">LightningPay-PHP</a>: PHP plugin
+for eCommerce website to add <em>Pay by Lightning</em> to accept order payments via the
+Lightning Network.</li>
   <li><a href="https://tippin.me/">Tippin.me</a> LN tips integrated to Twitter (custodial)</li>
+  <li><a href="https://lightning.gifts/">Lightning Gifts</a> Create fee-less Bitcoin gift
+vouchers to share with friends, family, and your haters. Powered by the Lightning Network ⚡️</li>
 </ul>
 
 <h3 id="gaming">Gaming</h3>
 <ul>
-  <li><a href="https://hammerco.in/">Hammercoin</a>: A role-playing game using Lightning for
-in-game payments</li>
-  <li><a href="https://play.google.com/store/apps/details?id=com.mandelduck.sarutobi">Sarutobi</a>:
-A game with Bitcoin and blockchain-based game items. <a href="https://blog.indiesquare.me/sarutobi-android-release-and-cross-game-promotion-through-tokens-59a1c58cc7b1#.eaa1svobj">Release
-announcement</a></li>
-  <li><a href="http://bitquest.co/">Bitquest</a>: The first Minecraft server denominated in
-cryptocurrency. <a href="https://coinjournal.net/you-can-go-on-a-digital-treasure-hunt-for-bitcoin-in-minecraft/">CoinJournal
-article</a></li>
   <li><a href="https://lightninggem.com/">Lightning Gem</a>: Betting game using Lightning for
 payments</li>
   <li><a href="https://kriptode.com/">Kriptode.com</a> Lightning based games and more.</li>
   <li><a href="https://satoshis.place/">Satoshis.place</a> Internet graffiti paid with Lightning</li>
-  <li>
-    <p><a href="http://thunderdice.ws/">Thunderdice</a>: Off-chain SatoshiDice</p>
+</ul>
 
-    <p><img src="/assets/lapps/thunderdice.png" alt="Screenshot of Thunder Dice Homepage" style="max-width: 50%;" /></p>
+<h3 id="physical-applications">Physical applications</h3>
+<ul>
+  <li><a href="https://twitter.com/BTCSocialist">Ben Arc</a>’s various <a href="https://github.com/arcbtc/">projects</a>
+based on Arduino, ESP32 and the M5Stack.
+    <ul>
+      <li><a href="https://github.com/arcbtc/M5StackSats">M5StackSats</a>:
+A bitcoin point of sale terminal using the ESP32 based M5Stack</li>
+      <li><a href="https://github.com/arcbtc/physically-faucet">Physically faucet</a>:
+A Lightning Network bitcoin faucet using the <a href="http://lightning.gifts">http://lightning.gifts</a> api</li>
+      <li><a href="https://github.com/arcbtc/flux-capacitor">Flux capacitor</a>:
+A dynamic Lightning Network point of sale device</li>
+      <li><a href="https://github.com/arcbtc/The-Fossa">The Fossa</a>:
+The Free and Open Source Software (FOSS) ATM, dump that stinky loose fiat change for glorious sats!</li>
+    </ul>
   </li>
+  <li><a href="https://github.com/21isenough/LightningATM">LightningATM</a>:
+This ATM accepts coins and sends bitcoin over the Lightning Network</li>
 </ul>
 
 <h3 id="eclair-lapps">Eclair Lapps</h3>
@@ -199,7 +204,7 @@ payments</li>
 <ul>
   <li><a href="https://github.com/ACINQ/eclair">Eclair</a> app: on
 <a href="https://github.com/ACINQ/eclair/releases">desktop</a> and
-<a href="https://play.google.com/store/apps/details?id=fr.acinq.eclair.wallet">Android</a></li>
+<a href="https://play.google.com/store/apps/details?id=fr.acinq.eclair.wallet.mainnet2">Android</a></li>
   <li><a href="https://starblocks.acinq.co/#/">Starblocks</a>: Virtual coffee shop</li>
   <li><a href="https://strike.acinq.co/#/">Strike</a>: Stripe-like Lightning payment aggregator
 API (custodial)</li>
@@ -224,36 +229,39 @@ Original c-lightning version of the Gateway plugin to accept Lightning
 payments at WooCommerce stores, based on Lightning Charge.</li>
   <li><a href="https://blockstream.com/2018/03/29/blockstreams-week-of-lapps-ends.html">Week of
 Lapps</a>
- built on Lightning Charge by Nadav Idgi.
+built on Lightning Charge by Nadav Idgi.
     <ul>
-      <li><a href="https://github.com/ElementsProject/nanopos">Nanopos</a> — A simple
+      <li><a href="https://github.com/ElementsProject/nanopos">Nanopos</a>: A simple
 point-of-sale system for fixed-price goods</li>
-      <li><a href="https://github.com/ElementsProject/filebazaar">FileBazaar</a> — A system for
+      <li><a href="https://github.com/ElementsProject/filebazaar">FileBazaar</a>: A system for
 selling files such as documents, images, and videos</li>
       <li><a href="https://github.com/ElementsProject/wordpress-lightning-publisher">Lightning Publisher for
-WordPress</a>
-— A patronage model for unlocking WordPress blog entries</li>
-      <li><a href="https://github.com/ElementsProject/paypercall">Paypercall</a> — A programmer’s
+WordPress</a>:
+A patronage model for unlocking WordPress blog entries</li>
+      <li><a href="https://github.com/ElementsProject/paypercall">Paypercall</a>: A programmer’s
 toolkit for Lightning that enables micropayments for individual API calls</li>
-      <li><a href="https://github.com/ElementsProject/ifpaytt">Ifpaytt</a> — An extension of
+      <li><a href="https://github.com/ElementsProject/ifpaytt">Ifpaytt</a>: An extension of
 paypercall that allows web developers using IFTTT to request payments for
 service usage</li>
-      <li><a href="https://github.com/ElementsProject/lightning-jukebox">Lightning Jukebox</a> —
+      <li><a href="https://github.com/ElementsProject/lightning-jukebox">Lightning Jukebox</a>:
 A fun demo that reimagines a classic technology for the Lightning Network</li>
-      <li><a href="https://github.com/ElementsProject/nanotip">Nanotip</a> — The simple tip jar,
+      <li><a href="https://github.com/ElementsProject/nanotip">Nanotip</a>: The simple tip jar,
 rebuilt to issue Lightning Network invoices</li>
     </ul>
   </li>
-  <li><a href="https://bitcoinlightning.shop">BitcoinLightning.shop</a>: Shop with Bitcoin
-Lightning, built on BTCPay and the c-lightning WooCommerce Plugin</li>
-  <li><a href="https://elaineou.com/shop/">Elaine Ou’s Twitter bot</a>: Pay for likes,
-retweets, and follows</li>
+  <li><a href="https://elaineou.com/shop/">Elaine Ou’s projects</a>:
+    <ul>
+      <li><a href="https://github.com/elaineo/Jellybean">Lightning-powered vending machine</a></li>
+      <li><a href="https://github.com/elaineo/lightningbot">Bitcoin-payable Twitter bot with Lightning Charge</a></li>
+      <li><a href="https://github.com/elaineo/LightningBuddy">Twitter relay for Lightning JSON-RPC interface</a></li>
+    </ul>
+  </li>
 </ul>
 
 <h3 id="requests">Requests</h3>
 
-<p>If you would like your Lightning app considered for this page, please share a
-link and a one sentence description of your app on the <a href="https://join.slack.com/t/lightningcommunity/shared_invite/enQtMzQ0OTQyNjE5NjU1LWRiMGNmOTZiNzU0MTVmYzc1ZGFkZTUyNzUwOGJjMjYwNWRkNWQzZWE3MTkwZjdjZGE5ZGNiNGVkMzI2MDU4ZTE">LND Developer Slack</a> 
+<p>If you would like a Lightning app considered for this page, please send a
+link and a one sentence description to <a href="mailto:hello@lightning.engineering">hello@lightning.engineering</a>.
 If applicable, please specify which Lightning implementation it is built on.</p>
 
   </div>

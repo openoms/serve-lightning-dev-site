@@ -76,10 +76,11 @@ web application.</p>
 
 <p>It’s time to recreate the micropayments ourselves. Get the starter code:</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Clear any local changes first and checkout the start tag</span>
-git checkout <span class="nt">--</span> <span class="nb">.</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Clear any local changes first and checkout the start tag</span>
+git checkout -- .
 git checkout start
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>The starter code has stripped out all micropayments code, and we just also just
 reset our database state to the default.</p>
@@ -91,13 +92,13 @@ better.</p>
 
 <p><code class="highlighter-rouge">coindesk/models.py</code> (cleaned up a little bit):</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Profile</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Profile</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span><span class="n">User</span><span class="p">)</span>
     <span class="n">created_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="n">modified_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="n">identity_pubkey</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="c1"># bitcoin_address = BitcoinAddressField()
-</span>
+    <span class="c"># bitcoin_address = BitcoinAddressField()</span>
+
 
 <span class="k">class</span> <span class="nc">Article</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 
@@ -111,7 +112,7 @@ better.</p>
     <span class="n">created_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="n">status</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">'visible'</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">ARTICLE_STATUS_CHOICES</span><span class="p">)</span>
 
-    <span class="o">@</span><span class="nb">property</span>
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">views</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">payments</span><span class="o">.</span><span class="nb">filter</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s">'complete'</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="s">'view'</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 
@@ -119,8 +120,8 @@ better.</p>
 <span class="k">class</span> <span class="nc">Payment</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 
     <span class="n">PAYMENT_STATUS_CHOICES</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">(</span><span class="s">'pending_invoice'</span><span class="p">,</span> <span class="s">'Pending Invoice'</span><span class="p">),</span> <span class="c1"># Should be atomic
-</span>        <span class="p">(</span><span class="s">'pending_payment'</span><span class="p">,</span> <span class="s">'Pending Payment'</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">'pending_invoice'</span><span class="p">,</span> <span class="s">'Pending Invoice'</span><span class="p">),</span> <span class="c"># Should be atomic</span>
+        <span class="p">(</span><span class="s">'pending_payment'</span><span class="p">,</span> <span class="s">'Pending Payment'</span><span class="p">),</span>
         <span class="p">(</span><span class="s">'complete'</span><span class="p">,</span> <span class="s">'Complete'</span><span class="p">),</span>
         <span class="p">(</span><span class="s">'error'</span><span class="p">,</span> <span class="s">'Error'</span><span class="p">),</span>
     <span class="p">)</span>
@@ -153,7 +154,8 @@ better.</p>
         Checks if the Lightning payment has been received for this invoice
         """</span>
         <span class="k">pass</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Each <code class="highlighter-rouge">Profile</code> object is associated with one <code class="highlighter-rouge">User</code> object, and stores the
 identity pubkey of that user.</p>
@@ -191,12 +193,12 @@ able to view the article.</li>
 important since it is executed when we view an article and handles what to do
 with the different payment states.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">article</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">article</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">article</span> <span class="o">=</span> <span class="n">Article</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="nb">filter</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s">'visible'</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">Article</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="s">"Article with id {} does not exist or is not visible"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">pk</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="s">"Article with id {} does not exist or is not visible"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pk</span><span class="p">))</span>
 
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s">'article'</span><span class="p">:</span> <span class="n">article</span><span class="p">}</span>
 
@@ -208,8 +210,8 @@ with the different payment states.</p>
     <span class="n">qs</span> <span class="o">=</span> <span class="n">article</span><span class="o">.</span><span class="n">payments</span><span class="o">.</span><span class="nb">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="s">'view'</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">qs</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># Generate a new payment
-</span>        <span class="n">payment</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Payment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="c"># Generate a new payment</span>
+        <span class="n">payment</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Payment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
                           <span class="n">article</span><span class="o">=</span><span class="n">article</span><span class="p">,</span>
                           <span class="n">purpose</span><span class="o">=</span><span class="s">'view'</span><span class="p">,</span>
                           <span class="n">satoshi_amount</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">MIN_VIEW_AMOUNT</span><span class="p">,</span>
@@ -218,12 +220,12 @@ with the different payment states.</p>
     <span class="k">elif</span> <span class="n">qs</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">payment</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># This should not happen because there should never be more than one view payment per article per person
-</span>        <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="s">"Multiple payments detected"</span><span class="p">)</span>
+        <span class="c"># This should not happen because there should never be more than one view payment per article per person</span>
+        <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="s">"Multiple payments detected"</span><span class="p">)</span>
 
-    <span class="c1"># User client requests that we check if the payment has been made
-</span>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">'check'</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s">"Checking for payment {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">payment</span><span class="o">.</span><span class="n">payment_request</span><span class="p">)</span>
+    <span class="c"># User client requests that we check if the payment has been made</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">'check'</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">"Checking for payment {}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">payment</span><span class="o">.</span><span class="n">payment_request</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">payment</span><span class="o">.</span><span class="n">check_payment</span><span class="p">():</span>
             <span class="k">print</span> <span class="s">"Payment succeeded!"</span>
         <span class="k">else</span><span class="p">:</span>
@@ -232,14 +234,14 @@ with the different payment states.</p>
     <span class="k">if</span> <span class="n">payment</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">'pending_invoice'</span><span class="p">:</span>
         <span class="n">payment</span><span class="o">.</span><span class="n">generate_invoice</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">article</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">payment</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">'pending_payment'</span><span class="p">:</span>
-        <span class="c1"># Do nothing; display the payment page to user
-</span>        <span class="k">pass</span>
+        <span class="c"># Do nothing; display the payment page to user</span>
+        <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">payment</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">'complete'</span><span class="p">:</span>
-        <span class="c1"># Do nothing; display the article to user
-</span>        <span class="k">pass</span>
+        <span class="c"># Do nothing; display the article to user</span>
+        <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">payment</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">'error'</span><span class="p">:</span>
-        <span class="c1"># TODO Optionally implement some kind of error resolution
-</span>        <span class="k">pass</span>
+        <span class="c"># TODO Optionally implement some kind of error resolution</span>
+        <span class="k">pass</span>
         <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="s">"Payment error"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">context</span><span class="p">[</span><span class="s">'payment_status'</span><span class="p">]</span> <span class="o">=</span> <span class="n">payment</span><span class="o">.</span><span class="n">status</span>
@@ -249,7 +251,8 @@ with the different payment states.</p>
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span>
         <span class="n">template_name</span><span class="o">=</span><span class="s">'article.html'</span><span class="p">,</span>
         <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>A quick breakdown of what’s going on:</p>
 <ol>
@@ -280,14 +283,15 @@ displaying the article content.</p>
 
 <p>In <code class="highlighter-rouge">coindesk/templates/article.html</code>, notice the following code:</p>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"article-body"</span><span class="nt">&gt;</span>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"article-body"</span><span class="nt">&gt;</span>
   <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"article-text"</span><span class="nt">&gt;</span>
     {{ article.text }}
   <span class="nt">&lt;/div&gt;</span>
 <span class="nt">&lt;/div&gt;</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<p><code class="highlighter-rouge">{{ article.text }}</code> is the Django template variable
+<p><code class="highlighter-rouge"><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">article.text</span><span class="w"> </span><span class="p">}</span><span class="err">}</span></code> is the Django template variable
 representing the text of the website. We need to hide this for all
 non-authenticated users. Let’s show them the <code class="highlighter-rouge">pay.html</code> page instead. And of
 course, users who have completed payments must be able to view the article
@@ -295,7 +299,7 @@ text.</p>
 
 <p>Make the necessary edits:</p>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"article-body"</span><span class="nt">&gt;</span>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"article-body"</span><span class="nt">&gt;</span>
   {% if not request.user.is_authenticated %}
     <span class="nt">&lt;h3&gt;</span>Make Payment<span class="nt">&lt;/h3&gt;</span>
     <span class="nt">&lt;p&gt;</span>
@@ -313,18 +317,19 @@ text.</p>
     <span class="nt">&lt;/div&gt;</span>
   {% endif %}
 <span class="nt">&lt;/div&gt;</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>As this is a Lightning tutorial, understanding the exact syntax is not
 important, but a quick clarification may be helpful:</p>
 <ul>
-  <li>The <code class="highlighter-rouge">{% if %}</code> blocks are Django’s way of adding
+  <li>The <code class="highlighter-rouge"><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> blocks are Django’s way of adding
 conditionals in html templates. We are using this to determine if users are
 logged in or if the payment is complete.</li>
   <li><code class="highlighter-rouge">payment</code> is a context variable the template needs populated in order to
 render correctly and access the relevant information. This was done in the
 <code class="highlighter-rouge">article</code> view.</li>
-  <li>The <code class="highlighter-rouge">{% include %}</code> tag adds in the template by the name
+  <li>The <code class="highlighter-rouge"><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">include</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> tag adds in the template by the name
 of <code class="highlighter-rouge">pay.html</code>.</li>
 </ul>
 
@@ -335,7 +340,7 @@ of <code class="highlighter-rouge">pay.html</code>.</li>
 
 <p>Examine <code class="highlighter-rouge">coindesk/templates/pay.html</code>:</p>
 
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"payment"</span> <span class="na">class=</span><span class="s">"ln-dialog"</span><span class="nt">&gt;</span>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"payment"</span> <span class="na">class=</span><span class="s">"ln-dialog"</span><span class="nt">&gt;</span>
   <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"submit_box"</span> <span class="na">class=</span><span class="s">"animated fadeInDown delay"</span><span class="nt">&gt;</span>
     <span class="nt">&lt;h3&gt;</span>Make Payment<span class="nt">&lt;/h3&gt;</span>
     <span class="nt">&lt;p&gt;</span>To view this article, please pay 1000 satoshis via the request below:<span class="nt">&lt;/p&gt;</span>
@@ -343,7 +348,8 @@ of <code class="highlighter-rouge">pay.html</code>.</li>
     <span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">"complete_button"</span> <span class="na">href=</span><span class="s">"/articles/{{ article.id }}/?check=true"</span><span class="nt">&gt;</span>Complete<span class="nt">&lt;/a&gt;</span>
   <span class="nt">&lt;/div&gt;</span>
 <span class="nt">&lt;/div&gt;</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>This template prompts the user to pay 1000 satoshis, and supplies a payment
 request.</p>
@@ -357,7 +363,7 @@ request" /></p>
 <p>Navigate to <code class="highlighter-rouge">generate_invoice</code> in <code class="highlighter-rouge">coindesk/models.py</code>. Modify it to the
 following:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">generate_invoice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">article</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">generate_invoice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">article</span><span class="p">):</span>
     <span class="s">"""
     Generates a new invoice
     """</span>
@@ -365,18 +371,20 @@ following:</p>
     <span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">insecure_channel</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LND_RPCHOST</span><span class="p">)</span>
     <span class="n">stub</span> <span class="o">=</span> <span class="n">lnrpc</span><span class="o">.</span><span class="n">LightningStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
 
-    <span class="n">add_invoice_resp</span> <span class="o">=</span> <span class="n">stub</span><span class="o">.</span><span class="n">AddInvoice</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">Invoice</span><span class="p">(</span><span class="n">amt</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">MIN_VIEW_AMOUNT</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="s">"User '{}' | ArticleId {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">article</span><span class="o">.</span><span class="nb">id</span><span class="p">)))</span>
+    <span class="n">add_invoice_resp</span> <span class="o">=</span> <span class="n">stub</span><span class="o">.</span><span class="n">AddInvoice</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">Invoice</span><span class="p">(</span><span class="n">amt</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">MIN_VIEW_AMOUNT</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="s">"User '{}' | ArticleId {}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">article</span><span class="o">.</span><span class="nb">id</span><span class="p">)))</span>
     <span class="n">r_hash_base64</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">add_invoice_resp</span><span class="o">.</span><span class="n">r_hash</span><span class="p">,</span> <span class="s">'base64'</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">r_hash</span> <span class="o">=</span> <span class="n">r_hash_base64</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">payment_request</span> <span class="o">=</span> <span class="n">add_invoice_resp</span><span class="o">.</span><span class="n">payment_request</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s">'pending_payment'</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Don’t forget also to include the necessary imports at the top of the file:</p>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">coindesk</span> <span class="kn">import</span> <span class="n">rpc_pb2</span> <span class="k">as</span> <span class="n">ln</span><span class="p">,</span> <span class="n">rpc_pb2_grpc</span> <span class="k">as</span> <span class="n">lnrpc</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">coindesk</span> <span class="kn">import</span> <span class="n">rpc_pb2</span> <span class="k">as</span> <span class="n">ln</span><span class="p">,</span> <span class="n">rpc_pb2_grpc</span> <span class="k">as</span> <span class="n">lnrpc</span>
 <span class="kn">import</span> <span class="nn">grpc</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Walking through the code:</p>
 <ul>
@@ -397,35 +405,37 @@ implement the <code class="highlighter-rouge">check_payment</code> function of t
 for you in the frontend:</p>
 
 <p>In <code class="highlighter-rouge">coindesk/templates/pay.html</code>:</p>
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">"complete_button"</span> <span class="na">href=</span><span class="s">"/articles//?check=true"</span><span class="nt">&gt;</span>Complete<span class="nt">&lt;/a&gt;</span>
-</code></pre></div></div>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">"complete_button"</span> <span class="na">href=</span><span class="s">"/articles//?check=true"</span><span class="nt">&gt;</span>Complete<span class="nt">&lt;/a&gt;</span>
+</code></pre>
+</div>
 
 <p>Now, try to implement the <code class="highlighter-rouge">check_payment</code> function yourself. Here’s some
 starter code to help you with the annoying and unimportant parts:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">check_payment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">check_payment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="s">"""
     Checks if the Lightning payment has been received for this invoice
     """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">'pending_invoice'</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">False</span>
 
-    <span class="c1"># Prepare r_hash_bytes, which can be passed into the gRPC client
-</span>    <span class="n">r_hash_base64</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_hash</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">)</span>
+    <span class="c"># Prepare r_hash_bytes, which can be passed into the gRPC client</span>
+    <span class="n">r_hash_base64</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_hash</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">)</span>
     <span class="n">r_hash_bytes</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">r_hash_base64</span><span class="p">,</span> <span class="s">'base64'</span><span class="p">))</span>
 
-    <span class="c1"># Implement this
-</span>    <span class="n">payment_settled</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="c"># Implement this</span>
+    <span class="n">payment_settled</span> <span class="o">=</span> <span class="bp">False</span>
 
     <span class="k">if</span> <span class="n">payment_settled</span><span class="p">:</span>
-        <span class="c1"># Payment complete
-</span>        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s">'complete'</span>
+        <span class="c"># Payment complete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s">'complete'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">True</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Payment not received
-</span>        <span class="k">return</span> <span class="bp">False</span>
-</code></pre></div></div>
+        <span class="c"># Payment not received</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</code></pre>
+</div>
 
 <p>If you’re absolutely stuck, you may refer to the <a href="https://github.com/MaxFangX/lightning-coindesk">tutorial
 repo</a> for the final solution.</p>

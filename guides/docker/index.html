@@ -104,7 +104,7 @@ next versions will use the started <code class="highlighter-rouge">btcd</code> b
 
 <p>In the workflow below, we describe the steps required to recreate the following
 topology, and send a payment from <code class="highlighter-rouge">Alice</code> to <code class="highlighter-rouge">Bob</code>.</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+ ----- +                   + --- +
+<div class="highlighter-rouge"><pre class="highlight"><code>+ ----- +                   + --- +
 | Alice | &lt;--- channel ---&gt; | Bob |  &lt;---   Bob and Alice are the lightning network daemons which 
 + ----- +                   + --- +         create channels and interact with each other using the   
     |                          |            Bitcoin network as source of truth. 
@@ -116,7 +116,8 @@ topology, and send a payment from <code class="highlighter-rouge">Alice</code> t
         + --------------- +        "btcd" node which represents the Bitcoin network, in a 
                                     real situation Alice and Bob will likely be 
                                     connected to different Bitcoin nodes.
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p><strong>General workflow is the following:</strong></p>
 
@@ -133,42 +134,44 @@ topology, and send a payment from <code class="highlighter-rouge">Alice</code> t
 
 <p>Start <code class="highlighter-rouge">btcd</code>, and then create an address for <code class="highlighter-rouge">Alice</code> that we’ll directly mine
 bitcoin into.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Init bitcoin network env variable:</span>
-<span class="nv">$ </span><span class="nb">export </span><span class="nv">NETWORK</span><span class="o">=</span><span class="s2">"simnet"</span> 
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Init bitcoin network env variable:</span>
+<span class="gp">$ </span><span class="nb">export </span><span class="nv">NETWORK</span><span class="o">=</span><span class="s2">"simnet"</span> 
 
 <span class="c"># Run the "Alice" container and log into it:</span>
-<span class="nv">$ </span>docker-compose run <span class="nt">-d</span> <span class="nt">--name</span> alice lnd_btc
-<span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-i</span> <span class="nt">-t</span> alice bash
+<span class="gp">$ </span>docker-compose run -d --name alice lnd_btc
+<span class="gp">$ </span>docker <span class="nb">exec</span> -i -t alice bash
 
 <span class="c"># Generate a new backward compatible nested p2sh address for Alice:</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet newaddress np2wkh 
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet newaddress np2wkh 
 
 <span class="c"># Recreate "btcd" node and set Alice's address as mining address:</span>
-<span class="nv">$ MINING_ADDRESS</span><span class="o">=</span>&lt;alice_address&gt; docker-compose up <span class="nt">-d</span> btcd
+<span class="gp">$ </span><span class="nv">MINING_ADDRESS</span><span class="o">=</span>&lt;alice_address&gt; docker-compose up -d btcd
 
 <span class="c"># Generate 400 blocks (we need at least "100 &gt;=" blocks because of coinbase </span>
 <span class="c"># block maturity and "300 ~=" in order to activate segwit):</span>
-<span class="nv">$ </span>docker-compose run btcctl generate 400
+<span class="gp">$ </span>docker-compose run btcctl generate 400
 
 <span class="c"># Check that segwit is active:</span>
-<span class="nv">$ </span>docker-compose run btcctl getblockchaininfo | <span class="nb">grep</span> <span class="nt">-A</span> 1 segwit
-</code></pre></div></div>
+<span class="gp">$ </span>docker-compose run btcctl getblockchaininfo | grep -A 1 segwit
+</code></pre>
+</div>
 
 <p>Check <code class="highlighter-rouge">Alice</code> balance:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alice$ lncli --network=simnet walletbalance
-</code></pre></div></div>
+<div class="highlighter-rouge"><pre class="highlight"><code>alice$ lncli --network=simnet walletbalance
+</code></pre>
+</div>
 
 <p>Connect <code class="highlighter-rouge">Bob</code> node to <code class="highlighter-rouge">Alice</code> node.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Run "Bob" node and log into it:</span>
-<span class="nv">$ </span>docker-compose run <span class="nt">-d</span> <span class="nt">--name</span> bob lnd_btc
-<span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-i</span> <span class="nt">-t</span> bob bash
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Run "Bob" node and log into it:</span>
+<span class="gp">$ </span>docker-compose run -d --name bob lnd_btc
+<span class="gp">$ </span>docker <span class="nb">exec</span> -i -t bob bash
 
 <span class="c"># Get the identity pubkey of "Bob" node:</span>
-bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet getinfo
+<span class="gp">bob$ </span>lncli --network<span class="o">=</span>simnet getinfo
 
 <span class="o">{</span>
-    <span class="nt">-----</span><span class="o">&gt;</span><span class="s2">"identity_pubkey"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
+    -----&gt;<span class="s2">"identity_pubkey"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
     <span class="s2">"alias"</span>: <span class="s2">""</span>,
     <span class="s2">"num_pending_channels"</span>: 0,
     <span class="s2">"num_active_channels"</span>: 0,
@@ -184,13 +187,13 @@ bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class=
 <span class="o">}</span>
 
 <span class="c"># Get the IP address of "Bob" node:</span>
-<span class="nv">$ </span>docker inspect bob | <span class="nb">grep </span>IPAddress
+<span class="gp">$ </span>docker inspect bob | grep IPAddress
 
 <span class="c"># Connect "Alice" to the "Bob" node:</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet connect &lt;bob_pubkey&gt;@&lt;bob_host&gt;
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet connect &lt;bob_pubkey&gt;@&lt;bob_host&gt;
 
 <span class="c"># Check list of peers on "Alice" side:</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listpeers
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet listpeers
 <span class="o">{</span>
     <span class="s2">"peers"</span>: <span class="o">[</span>
         <span class="o">{</span>
@@ -207,7 +210,7 @@ alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span clas
 <span class="o">}</span>
 
 <span class="c"># Check list of peers on "Bob" side:</span>
-bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listpeers
+<span class="gp">bob$ </span>lncli --network<span class="o">=</span>simnet listpeers
 <span class="o">{</span>
     <span class="s2">"peers"</span>: <span class="o">[</span>
         <span class="o">{</span>
@@ -222,17 +225,18 @@ bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class=
         <span class="o">}</span>
     <span class="o">]</span>
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Create the <code class="highlighter-rouge">Alice&lt;-&gt;Bob</code> channel.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Open the channel with "Bob":</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet openchannel <span class="nt">--node_key</span><span class="o">=</span>&lt;bob_identity_pubkey&gt; <span class="nt">--local_amt</span><span class="o">=</span>1000000
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Open the channel with "Bob":</span>
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet openchannel --node_key<span class="o">=</span>&lt;bob_identity_pubkey&gt; --local_amt<span class="o">=</span>1000000
 
 <span class="c"># Include funding transaction in block thereby opening the channel:</span>
-<span class="nv">$ </span>docker-compose run btcctl generate 3
+<span class="gp">$ </span>docker-compose run btcctl generate 3
 
 <span class="c"># Check that channel with "Bob" was opened:</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listchannels
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet listchannels
 <span class="o">{</span>
     <span class="s2">"channels"</span>: <span class="o">[</span>
         <span class="o">{</span>
@@ -256,38 +260,40 @@ alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span clas
         <span class="o">}</span>
     <span class="o">]</span>
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Send the payment from <code class="highlighter-rouge">Alice</code> to <code class="highlighter-rouge">Bob</code>.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Add invoice on "Bob" side:</span>
-bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet addinvoice <span class="nt">--amt</span><span class="o">=</span>10000
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Add invoice on "Bob" side:</span>
+<span class="gp">bob$ </span>lncli --network<span class="o">=</span>simnet addinvoice --amt<span class="o">=</span>10000
 <span class="o">{</span>
         <span class="s2">"r_hash"</span>: <span class="s2">"&lt;your_random_rhash_here&gt;"</span>, 
         <span class="s2">"pay_req"</span>: <span class="s2">"&lt;encoded_invoice&gt;"</span>, 
 <span class="o">}</span>
 
 <span class="c"># Send payment from "Alice" to "Bob":</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;encoded_invoice&gt;
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet sendpayment --pay_req<span class="o">=</span>&lt;encoded_invoice&gt;
 
 <span class="c"># Check "Alice"'s channel balance</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet channelbalance
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet channelbalance
 
 <span class="c"># Check "Bob"'s channel balance</span>
-bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet channelbalance
-</code></pre></div></div>
+<span class="gp">bob$ </span>lncli --network<span class="o">=</span>simnet channelbalance
+</code></pre>
+</div>
 
 <p>Now we have open channel in which we sent only one payment, let’s imagine
 that we sent lots of them and we’d now like to close the channel. Let’s do
 it!</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># List the "Alice" channel and retrieve "channel_point" which represents</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># List the "Alice" channel and retrieve "channel_point" which represents</span>
 <span class="c"># the opened channel:</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet listchannels
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet listchannels
 <span class="o">{</span>
     <span class="s2">"channels"</span>: <span class="o">[</span>
         <span class="o">{</span>
             <span class="s2">"active"</span>: <span class="nb">true</span>,
             <span class="s2">"remote_pubkey"</span>: <span class="s2">"0343bc80b914aebf8e50eb0b8e445fc79b9e6e8e5e018fa8c5f85c7d429c117b38"</span>,
-       <span class="nt">----</span><span class="o">&gt;</span><span class="s2">"channel_point"</span>: <span class="s2">"3511ae8a52c97d957eaf65f828504e68d0991f0276adff94c6ba91c7f6cd4275:0"</span>,
+       ----&gt;<span class="s2">"channel_point"</span>: <span class="s2">"3511ae8a52c97d957eaf65f828504e68d0991f0276adff94c6ba91c7f6cd4275:0"</span>,
             <span class="s2">"chan_id"</span>: <span class="s2">"1337006139441152"</span>,
             <span class="s2">"capacity"</span>: <span class="s2">"1005000"</span>,
             <span class="s2">"local_balance"</span>: <span class="s2">"990000"</span>,
@@ -308,23 +314,24 @@ alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span clas
 
 <span class="c"># Channel point consists of two numbers separated by a colon. The first one </span>
 <span class="c"># is "funding_txid" and the second one is "output_index":</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet closechannel <span class="nt">--funding_txid</span><span class="o">=</span>&lt;funding_txid&gt; <span class="nt">--output_index</span><span class="o">=</span>&lt;output_index&gt;
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet closechannel --funding_txid<span class="o">=</span>&lt;funding_txid&gt; --output_index<span class="o">=</span>&lt;output_index&gt;
 
 <span class="c"># Include close transaction in a block thereby closing the channel:</span>
-<span class="nv">$ </span>docker-compose run btcctl generate 3
+<span class="gp">$ </span>docker-compose run btcctl generate 3
 
 <span class="c"># Check "Alice" on-chain balance was credited by her settled amount in the channel:</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet walletbalance
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>simnet walletbalance
 
 <span class="c"># Check "Bob" on-chain balance was credited with the funds he received in the</span>
 <span class="c"># channel:</span>
-bob<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>simnet walletbalance
+<span class="gp">bob$ </span>lncli --network<span class="o">=</span>simnet walletbalance
 <span class="o">{</span>
     <span class="s2">"total_balance"</span>: <span class="s2">"10000"</span>,
     <span class="s2">"confirmed_balance"</span>: <span class="s2">"10000"</span>,
     <span class="s2">"unconfirmed_balance"</span>: <span class="s2">"0"</span>
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h3 id="connect-to-faucet-lightning-node">Connect to faucet lightning node</h3>
 <p>In order to be more confident with <code class="highlighter-rouge">lnd</code> commands I suggest you to try 
@@ -334,7 +341,7 @@ to create a mini lightning network cluster (<a href="#create-lightning-network-c
 which we will create a channel with and send some amount of 
 bitcoins. The schema will be following:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+ ----- +                   + ------ +         (1)        + --- +
+<div class="highlighter-rouge"><pre class="highlight"><code>+ ----- +                   + ------ +         (1)        + --- +
 | Alice | &lt;--- channel ---&gt; | Faucet |  &lt;--- channel ---&gt; | Bob |    
 + ----- +                   + ------ +                    + --- +        
     |                            |                           |           
@@ -356,27 +363,30 @@ bitcoins. The schema will be following:</p>
  (3) In current scenario "Alice" and "Faucet" lightning network nodes 
  connect to different Bitcoin nodes. If you decide to connect "Bob"
  to "Faucet" then the already created "btcd" node would be sufficient.
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>First of all you need to run <code class="highlighter-rouge">btcd</code> node in <code class="highlighter-rouge">testnet</code> and wait for it to be 
 synced with test network (<code class="highlighter-rouge">May the Force and Patience be with you</code>).</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Init bitcoin network env variable:</span>
-<span class="nv">$ </span><span class="nb">export </span><span class="nv">NETWORK</span><span class="o">=</span><span class="s2">"testnet"</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Init bitcoin network env variable:</span>
+<span class="gp">$ </span><span class="nb">export </span><span class="nv">NETWORK</span><span class="o">=</span><span class="s2">"testnet"</span>
 
 <span class="c"># Run "btcd" node:</span>
-<span class="nv">$ </span>docker-compose up <span class="nt">-d</span> <span class="s2">"btcd"</span>
-</code></pre></div></div>
+<span class="gp">$ </span>docker-compose up -d <span class="s2">"btcd"</span>
+</code></pre>
+</div>
 
 <p>After <code class="highlighter-rouge">btcd</code> synced, connect <code class="highlighter-rouge">Alice</code> to the <code class="highlighter-rouge">Faucet</code> node.</p>
 
 <p>The <code class="highlighter-rouge">Faucet</code> node address can be found at the <a href="https://faucet.lightning.community">Faucet Lightning Community webpage</a>.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Run "Alice" container and log into it:</span>
-<span class="nv">$ </span>docker-compose run <span class="nt">-d</span> <span class="nt">--name</span> alice lnd_btc<span class="p">;</span> docker <span class="nb">exec</span> <span class="nt">-i</span> <span class="nt">-t</span> <span class="s2">"alice"</span> bash
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Run "Alice" container and log into it:</span>
+<span class="gp">$ </span>docker-compose run -d --name alice lnd_btc; docker <span class="nb">exec</span> -i -t <span class="s2">"alice"</span> bash
 
 <span class="c"># Connect "Alice" to the "Faucet" node:</span>
-alice<span class="nv">$ </span>lncli <span class="nt">--network</span><span class="o">=</span>testnet connect &lt;faucet_identity_address&gt;@&lt;faucet_host&gt;
-</code></pre></div></div>
+<span class="gp">alice$ </span>lncli --network<span class="o">=</span>testnet connect &lt;faucet_identity_address&gt;@&lt;faucet_host&gt;
+</code></pre>
+</div>
 
 <p>After a connection is achieved, the <code class="highlighter-rouge">Faucet</code> node should create the channel
 and send some amount of bitcoins to <code class="highlighter-rouge">Alice</code>.</p>
@@ -393,8 +403,9 @@ and send some amount of bitcoins to <code class="highlighter-rouge">Alice</code>
 
 <ul>
   <li>How to see <code class="highlighter-rouge">alice</code> | <code class="highlighter-rouge">bob</code> | <code class="highlighter-rouge">btcd</code> logs?
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose logs &lt;alice|bob|btcd&gt;
-</code></pre></div>    </div>
+    <div class="language-bash highlighter-rouge"><pre class="highlight"><code>docker-compose logs &lt;alice|bob|btcd&gt;
+</code></pre>
+    </div>
   </li>
 </ul>
 

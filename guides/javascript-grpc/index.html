@@ -72,12 +72,14 @@
     <h3 id="setup-and-installation">Setup and Installation</h3>
 
 <p>First, you’ll need to initialize a simple nodejs project:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm init (or npm init -f if you want to use the default values without prompt)
-</code></pre></div></div>
+<div class="highlighter-rouge"><pre class="highlight"><code>npm init (or npm init -f if you want to use the default values without prompt)
+</code></pre>
+</div>
 
 <p>Then you need to install the Javascript grpc library dependency:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install grpc --save
-</code></pre></div></div>
+<div class="highlighter-rouge"><pre class="highlight"><code>npm install grpc --save
+</code></pre>
+</div>
 
 <p>You also need to copy the <code class="highlighter-rouge">lnd</code> <code class="highlighter-rouge">rpc.proto</code> file in your project directory (or
 at least somewhere reachable by your Javascript code).</p>
@@ -88,30 +90,32 @@ sources</a>.</p>
 <p>In order for the auto-generated code to compile successfully, you’ll need to
 comment out the following line:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//import "google/api/annotations.proto";
-</code></pre></div></div>
+<div class="highlighter-rouge"><pre class="highlight"><code>//import "google/api/annotations.proto";
+</code></pre>
+</div>
 
 <h4 id="imports-and-client">Imports and Client</h4>
 
 <p>Every time you work with Javascript gRPC, you will have to import <code class="highlighter-rouge">grpc</code>, load
 <code class="highlighter-rouge">rpc.proto</code>, and create a connection to your client like so:</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">grpc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">grpc</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">fs</span><span class="dl">"</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">grpc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'grpc'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"fs"</span><span class="p">);</span>
 
 <span class="c1">// Due to updated ECDSA generated tls.cert we need to let gprc know that</span>
 <span class="c1">// we need to use that cipher suite otherwise there will be a handhsake</span>
 <span class="c1">// error when we communicate with the lnd rpc server.</span>
-<span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">GRPC_SSL_CIPHER_SUITES</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">HIGH+ECDSA</span><span class="dl">'</span>
+<span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">GRPC_SSL_CIPHER_SUITES</span> <span class="o">=</span> <span class="s1">'HIGH+ECDSA'</span>
 
 <span class="c1">//  Lnd cert is at ~/.lnd/tls.cert on Linux and</span>
 <span class="c1">//  ~/Library/Application Support/Lnd/tls.cert on Mac</span>
-<span class="kd">var</span> <span class="nx">lndCert</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="dl">"</span><span class="s2">~/.lnd/tls.cert</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lndCert</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">"~/.lnd/tls.cert"</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">credentials</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">credentials</span><span class="p">.</span><span class="nx">createSsl</span><span class="p">(</span><span class="nx">lndCert</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">lnrpcDescriptor</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="dl">"</span><span class="s2">rpc.proto</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lnrpcDescriptor</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s2">"rpc.proto"</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">lnrpc</span> <span class="o">=</span> <span class="nx">lnrpcDescriptor</span><span class="p">.</span><span class="nx">lnrpc</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">lightning</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lnrpc</span><span class="p">.</span><span class="nx">Lightning</span><span class="p">(</span><span class="dl">'</span><span class="s1">localhost:10009</span><span class="dl">'</span><span class="p">,</span> <span class="nx">credentials</span><span class="p">);</span>
-</code></pre></div></div>
+<span class="kd">var</span> <span class="nx">lightning</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lnrpc</span><span class="p">.</span><span class="nx">Lightning</span><span class="p">(</span><span class="s1">'localhost:10009'</span><span class="p">,</span> <span class="nx">credentials</span><span class="p">);</span>
+</code></pre>
+</div>
 
 <h3 id="examples">Examples</h3>
 
@@ -122,14 +126,15 @@ two nodes.</p>
 
 <h4 id="simple-rpc">Simple RPC</h4>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="nx">lightning</span><span class="p">.</span><span class="nx">getInfo</span><span class="p">({},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
-  	<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">GetInfo:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="o">&gt;</span> <span class="nx">lightning</span><span class="p">.</span><span class="nx">getInfo</span><span class="p">({},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+  	<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'GetInfo:'</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
   <span class="p">});</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>You should get something like this in your console:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GetInfo: { identity_pubkey: '03c892e3f3f077ea1e381c081abb36491a2502bc43ed37ffb82e264224f325ff27',
+<div class="highlighter-rouge"><pre class="highlight"><code>GetInfo: { identity_pubkey: '03c892e3f3f077ea1e381c081abb36491a2502bc43ed37ffb82e264224f325ff27',
   alias: '',
   num_pending_channels: 0,
   num_active_channels: 1,
@@ -140,61 +145,65 @@ two nodes.</p>
   synced_to_chain: false,
   testnet: false,
   chains: [ 'bitcoin' ] }
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h4 id="response-streaming-rpc">Response-streaming RPC</h4>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">call</span> <span class="o">=</span> <span class="nx">lightning</span><span class="p">.</span><span class="nx">subscribeInvoices</span><span class="p">({});</span>
-<span class="nx">call</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">data</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">invoice</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">call</span> <span class="o">=</span> <span class="nx">lightning</span><span class="p">.</span><span class="nx">subscribeInvoices</span><span class="p">({});</span>
+<span class="nx">call</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'data'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">invoice</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">invoice</span><span class="p">);</span>
 <span class="p">})</span>
-<span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">end</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'end'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="c1">// The server has finished sending</span>
 <span class="p">})</span>
-<span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">status</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">status</span><span class="p">)</span> <span class="p">{</span>
+<span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'status'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">status</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// Process status</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Current status</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">status</span><span class="p">);</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Current status"</span> <span class="o">+</span> <span class="nx">status</span><span class="p">);</span>
 <span class="p">});</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Now, create an invoice for your node at <code class="highlighter-rouge">localhost:10009</code>and send a payment to
 it from another node.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>lncli addinvoice <span class="nt">--amt</span><span class="o">=</span>100
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">$ </span>lncli addinvoice --amt<span class="o">=</span>100
 <span class="o">{</span>
 	<span class="s2">"r_hash"</span>: &lt;RHASH&gt;,
 	<span class="s2">"pay_req"</span>: &lt;PAYMENT_REQUEST&gt;
 <span class="o">}</span>
-<span class="nv">$ </span>lncli sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;PAYMENT_REQUEST&gt;
-</code></pre></div></div>
+<span class="gp">$ </span>lncli sendpayment --pay_req<span class="o">=</span>&lt;PAYMENT_REQUEST&gt;
+</code></pre>
+</div>
 <p>Your Javascript console should now display the details of the recently satisfied
 invoice.</p>
 
 <h4 id="bidirectional-streaming-rpc">Bidirectional-streaming RPC</h4>
 
 <p>This example has a few dependencies:</p>
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">--save</span> async lodash bytebuffer
-</code></pre></div></div>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>npm install --save async lodash bytebuffer
+</code></pre>
+</div>
 
 <p>You can run the following in your shell or put it in a program and run it like
 <code class="highlighter-rouge">node script.js</code></p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Load some libraries specific to this example</span>
-<span class="kd">var</span> <span class="k">async</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">async</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">_</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">lodash</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">ByteBuffer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">bytebuffer</span><span class="dl">'</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Load some libraries specific to this example</span>
+<span class="kd">var</span> <span class="nx">async</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'async'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">_</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'lodash'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ByteBuffer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'bytebuffer'</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">dest_pubkey</span> <span class="o">=</span> <span class="o">&lt;</span><span class="nx">RECEIVER_ID_PUBKEY</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="kd">var</span> <span class="nx">dest_pubkey_bytes</span> <span class="o">=</span> <span class="nx">ByteBuffer</span><span class="p">.</span><span class="nx">fromHex</span><span class="p">(</span><span class="nx">dest_pubkey</span><span class="p">);</span>
 
 <span class="c1">// Set a listener on the bidirectional stream</span>
 <span class="kd">var</span> <span class="nx">call</span> <span class="o">=</span> <span class="nx">lightning</span><span class="p">.</span><span class="nx">sendPayment</span><span class="p">();</span>
-<span class="nx">call</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">data</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">payment</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Payment sent:</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">call</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'data'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">payment</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Payment sent:"</span><span class="p">);</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">payment</span><span class="p">);</span>
 <span class="p">});</span>
-<span class="nx">call</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">end</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="nx">call</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'end'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="c1">// The server has finished</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">END</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"END"</span><span class="p">);</span>
 <span class="p">});</span>
 
 <span class="c1">// You can send single payments like this</span>
@@ -203,8 +212,8 @@ invoice.</p>
 <span class="c1">// Or send a bunch of them like this</span>
 <span class="kd">function</span> <span class="nx">paymentSender</span><span class="p">(</span><span class="nx">destination</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Sending </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">amount</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> satoshis</span><span class="dl">"</span><span class="p">);</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">To: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">destination</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Sending "</span> <span class="o">+</span> <span class="nx">amount</span> <span class="o">+</span> <span class="s2">" satoshis"</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"To: "</span> <span class="o">+</span> <span class="nx">destination</span><span class="p">);</span>
     <span class="nx">call</span><span class="p">.</span><span class="nx">write</span><span class="p">({</span>
       <span class="na">dest</span><span class="p">:</span> <span class="nx">destination</span><span class="p">,</span>
       <span class="na">amt</span><span class="p">:</span> <span class="nx">amount</span>
@@ -216,56 +225,58 @@ invoice.</p>
 <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
   <span class="nx">payment_senders</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">paymentSender</span><span class="p">(</span><span class="nx">dest_pubkey_bytes</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
 <span class="p">}</span>
-<span class="k">async</span><span class="p">.</span><span class="nx">series</span><span class="p">(</span><span class="nx">payment_senders</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="nx">async</span><span class="p">.</span><span class="nx">series</span><span class="p">(</span><span class="nx">payment_senders</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="nx">call</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
 <span class="p">});</span>
 
-</code></pre></div></div>
+</code></pre>
+</div>
 <p>This example will send a payment of 100 satoshis every 2 seconds.</p>
 
 <h4 id="using-macaroons">Using Macaroons</h4>
 
 <p>To authenticate using macaroons you need to include the macaroon in the metadata of the request.</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">fs</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">grpc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">grpc</span><span class="dl">'</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'fs'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">grpc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'grpc'</span><span class="p">);</span>
 
-<span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">GRPC_SSL_CIPHER_SUITES</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">HIGH+ECDSA</span><span class="dl">'</span>
+<span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">GRPC_SSL_CIPHER_SUITES</span> <span class="o">=</span> <span class="s1">'HIGH+ECDSA'</span>
 
 <span class="c1">// Lnd admin macaroon is at ~/.lnd/data/chain/bitcoin/simnet/admin.macaroon on Linux and</span>
 <span class="c1">// ~/Library/Application Support/Lnd/data/chain/bitcoin/simnet/admin.macaroon on Mac</span>
-<span class="kd">var</span> <span class="nx">m</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="dl">'</span><span class="s1">~/.lnd/data/chain/bitcoin/simnet/admin.macaroon</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">macaroon</span> <span class="o">=</span> <span class="nx">m</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="dl">'</span><span class="s1">hex</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">meta</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">Metadata</span><span class="p">().</span><span class="nx">add</span><span class="p">(</span><span class="dl">'</span><span class="s1">macaroon</span><span class="dl">'</span><span class="p">,</span> <span class="nx">macaroon</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">m</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s1">'~/.lnd/data/chain/bitcoin/simnet/admin.macaroon'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">macaroon</span> <span class="o">=</span> <span class="nx">m</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">'hex'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">meta</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">Metadata</span><span class="p">().</span><span class="nx">add</span><span class="p">(</span><span class="s1">'macaroon'</span><span class="p">,</span> <span class="nx">macaroon</span><span class="p">);</span>
 
-<span class="kd">var</span> <span class="nx">lnrpcDescriptor</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="dl">"</span><span class="s2">rpc.proto</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lnrpcDescriptor</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s2">"rpc.proto"</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">lnrpc</span> <span class="o">=</span> <span class="nx">lnrpcDescriptor</span><span class="p">.</span><span class="nx">lnrpc</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lnrpc</span><span class="p">.</span><span class="nx">Lightning</span><span class="p">(</span><span class="dl">'</span><span class="s1">some.address:10009</span><span class="dl">'</span><span class="p">,</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">credentials</span><span class="p">.</span><span class="nx">createInsecure</span><span class="p">());</span>
+<span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lnrpc</span><span class="p">.</span><span class="nx">Lightning</span><span class="p">(</span><span class="s1">'some.address:10009'</span><span class="p">,</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">credentials</span><span class="p">.</span><span class="nx">createInsecure</span><span class="p">());</span>
 
 <span class="nx">client</span><span class="p">.</span><span class="nx">getInfo</span><span class="p">({},</span> <span class="nx">meta</span><span class="p">);</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>However, this can get tiresome to do for each request, so to avoid explicitly including the macaroon we can update the credentials to include it automatically.</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">fs</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">grpc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">grpc</span><span class="dl">'</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'fs'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">grpc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'grpc'</span><span class="p">);</span>
 
-<span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">GRPC_SSL_CIPHER_SUITES</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">HIGH+ECDSA</span><span class="dl">'</span>
+<span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">GRPC_SSL_CIPHER_SUITES</span> <span class="o">=</span> <span class="s1">'HIGH+ECDSA'</span>
 
 <span class="c1">// Lnd admin macaroon is at ~/.lnd/data/chain/bitcoin/simnet/admin.macaroon on Linux and</span>
 <span class="c1">// ~/Library/Application Support/Lnd/data/chain/bitcoin/simnet/admin.macaroon on Mac</span>
-<span class="kd">var</span> <span class="nx">m</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="dl">'</span><span class="s1">~/.lnd/data/chain/bitcoin/simnet/admin.macaroon</span><span class="dl">'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">macaroon</span> <span class="o">=</span> <span class="nx">m</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="dl">'</span><span class="s1">hex</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">m</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s1">'~/.lnd/data/chain/bitcoin/simnet/admin.macaroon'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">macaroon</span> <span class="o">=</span> <span class="nx">m</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">'hex'</span><span class="p">);</span>
 
 <span class="c1">// build meta data credentials</span>
 <span class="kd">var</span> <span class="nx">metadata</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">Metadata</span><span class="p">()</span>
-<span class="nx">metadata</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="dl">'</span><span class="s1">macaroon</span><span class="dl">'</span><span class="p">,</span> <span class="nx">macaroon</span><span class="p">)</span>
+<span class="nx">metadata</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s1">'macaroon'</span><span class="p">,</span> <span class="nx">macaroon</span><span class="p">)</span>
 <span class="kd">var</span> <span class="nx">macaroonCreds</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">credentials</span><span class="p">.</span><span class="nx">createFromMetadataGenerator</span><span class="p">((</span><span class="nx">_args</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
   <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">metadata</span><span class="p">);</span>
 <span class="p">});</span>
 
 <span class="c1">// build ssl credentials using the cert the same as before</span>
-<span class="kd">var</span> <span class="nx">lndCert</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="dl">"</span><span class="s2">~/.lnd/tls.cert</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lndCert</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">"~/.lnd/tls.cert"</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">sslCreds</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">credentials</span><span class="p">.</span><span class="nx">createSsl</span><span class="p">(</span><span class="nx">lndCert</span><span class="p">);</span>
 
 <span class="c1">// combine the cert credentials and the macaroon auth credentials</span>
@@ -273,12 +284,13 @@ invoice.</p>
 <span class="kd">var</span> <span class="nx">credentials</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">credentials</span><span class="p">.</span><span class="nx">combineChannelCredentials</span><span class="p">(</span><span class="nx">sslCreds</span><span class="p">,</span> <span class="nx">macaroonCreds</span><span class="p">);</span>
 
 <span class="c1">// Pass the crendentials when creating a channel</span>
-<span class="kd">var</span> <span class="nx">lnrpcDescriptor</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="dl">"</span><span class="s2">rpc.proto</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lnrpcDescriptor</span> <span class="o">=</span> <span class="nx">grpc</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s2">"rpc.proto"</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">lnrpc</span> <span class="o">=</span> <span class="nx">lnrpcDescriptor</span><span class="p">.</span><span class="nx">lnrpc</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lnrpc</span><span class="p">.</span><span class="nx">Lightning</span><span class="p">(</span><span class="dl">'</span><span class="s1">some.address:10009</span><span class="dl">'</span><span class="p">,</span> <span class="nx">credentials</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lnrpc</span><span class="p">.</span><span class="nx">Lightning</span><span class="p">(</span><span class="s1">'some.address:10009'</span><span class="p">,</span> <span class="nx">credentials</span><span class="p">);</span>
 
 <span class="nx">client</span><span class="p">.</span><span class="nx">getInfo</span><span class="p">({},</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="p">...</span> <span class="p">});</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h3 id="conclusion">Conclusion</h3>
 

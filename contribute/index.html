@@ -278,33 +278,35 @@ function will likely need to know and/or understand:<br /><br /></li>
 </ul>
 
 <p><strong>WRONG</strong></p>
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// generates a revocation key</span>
-<span class="k">func</span> <span class="n">DeriveRevocationPubkey</span><span class="p">(</span><span class="n">commitPubKey</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="p">,</span>
-	<span class="n">revokePreimage</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span> <span class="p">{</span>
-</code></pre></div></div>
+<div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="c">// generates a revocation key</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="n">DeriveRevocationPubkey</span><span class="p">(</span><span class="n">commitPubKey</span><span class="x"> </span><span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="p">,</span><span class="x">
+	</span><span class="n">revokePreimage</span><span class="x"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="x"> </span><span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="x"> </span><span class="p">{</span><span class="x">
+</span></code></pre>
+</div>
 <p><strong>RIGHT</strong></p>
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// DeriveRevocationPubkey derives the revocation public key given the</span>
-<span class="c">// counterparty's commitment key, and revocation preimage derived via a</span>
-<span class="c">// pseudo-random-function. In the event that we (for some reason) broadcast a</span>
-<span class="c">// revoked commitment transaction, then if the other party knows the revocation</span>
-<span class="c">// preimage, then they'll be able to derive the corresponding private key to</span>
-<span class="c">// this private key by exploiting the homomorphism in the elliptic curve group:</span>
-<span class="c">//    * https://en.wikipedia.org/wiki/Group_homomorphism#Homomorphisms_of_abelian_groups</span>
-<span class="c">//</span>
-<span class="c">// The derivation is performed as follows:</span>
-<span class="c">//</span>
-<span class="c">//   revokeKey := commitKey + revokePoint</span>
-<span class="c">//             := G*k + G*h</span>
-<span class="c">//             := G * (k+h)</span>
-<span class="c">//</span>
-<span class="c">// Therefore, once we divulge the revocation preimage, the remote peer is able to</span>
-<span class="c">// compute the proper private key for the revokeKey by computing:</span>
-<span class="c">//   revokePriv := commitPriv + revokePreimge mod N</span>
-<span class="c">//</span>
-<span class="c">// Where N is the order of the sub-group.</span>
-<span class="k">func</span> <span class="n">DeriveRevocationPubkey</span><span class="p">(</span><span class="n">commitPubKey</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="p">,</span>
-	<span class="n">revokePreimage</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span> <span class="p">{</span>
-</code></pre></div></div>
+<div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="c">// DeriveRevocationPubkey derives the revocation public key given the</span><span class="x">
+</span><span class="c">// counterparty's commitment key, and revocation preimage derived via a</span><span class="x">
+</span><span class="c">// pseudo-random-function. In the event that we (for some reason) broadcast a</span><span class="x">
+</span><span class="c">// revoked commitment transaction, then if the other party knows the revocation</span><span class="x">
+</span><span class="c">// preimage, then they'll be able to derive the corresponding private key to</span><span class="x">
+</span><span class="c">// this private key by exploiting the homomorphism in the elliptic curve group:</span><span class="x">
+</span><span class="c">//    * https://en.wikipedia.org/wiki/Group_homomorphism#Homomorphisms_of_abelian_groups</span><span class="x">
+</span><span class="c">//</span><span class="x">
+</span><span class="c">// The derivation is performed as follows:</span><span class="x">
+</span><span class="c">//</span><span class="x">
+</span><span class="c">//   revokeKey := commitKey + revokePoint</span><span class="x">
+</span><span class="c">//             := G*k + G*h</span><span class="x">
+</span><span class="c">//             := G * (k+h)</span><span class="x">
+</span><span class="c">//</span><span class="x">
+</span><span class="c">// Therefore, once we divulge the revocation preimage, the remote peer is able to</span><span class="x">
+</span><span class="c">// compute the proper private key for the revokeKey by computing:</span><span class="x">
+</span><span class="c">//   revokePriv := commitPriv + revokePreimge mod N</span><span class="x">
+</span><span class="c">//</span><span class="x">
+</span><span class="c">// Where N is the order of the sub-group.</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="n">DeriveRevocationPubkey</span><span class="p">(</span><span class="n">commitPubKey</span><span class="x"> </span><span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="p">,</span><span class="x">
+	</span><span class="n">revokePreimage</span><span class="x"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="x"> </span><span class="o">*</span><span class="n">btcec</span><span class="o">.</span><span class="n">PublicKey</span><span class="x"> </span><span class="p">{</span><span class="x">
+</span></code></pre>
+</div>
 <ul>
   <li>Comments in the body of the code are highly encouraged, but they should
 explain the intention of the code as opposed to just calling out the
@@ -318,12 +320,13 @@ if amt &lt; 546 {
 }
 </code></pre>
 <p><strong>RIGHT</strong></p>
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Treat transactions with amounts less than the amount which is considered dust</span>
-<span class="c">// as non-standard.</span>
-<span class="k">if</span> <span class="n">amt</span> <span class="o">&lt;</span> <span class="m">546</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="n">err</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="c">// Treat transactions with amounts less than the amount which is considered dust</span><span class="x">
+</span><span class="c">// as non-standard.</span><span class="x">
+</span><span class="k">if</span><span class="x"> </span><span class="n">amt</span><span class="x"> </span><span class="o">&lt;</span><span class="x"> </span><span class="m">546</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">err</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
 <p><strong>NOTE:</strong> The above should really use a constant as opposed to a magic number,
 but it was left as a magic number to show how much of a difference a good
 comment can make.</p>
@@ -340,7 +343,7 @@ being provided here.</p>
 
 <p>Here’s a model Git commit message:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Short (50 chars or less) summary of changes
+<div class="highlighter-rouge"><pre class="highlight"><code>Short (50 chars or less) summary of changes
 
 More detailed explanatory text, if necessary.  Wrap it to about 72
 characters or so.  In some contexts, the first line is treated as the
@@ -359,7 +362,8 @@ Further paragraphs come after blank lines.
 - Typically a hyphen or asterisk is used for the bullet, preceded by a
   single space, with blank lines in between, but conventions vary here
 - Use a hanging indent
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Here are some of the reasons why wrapping your commit messages to 72 columns is
 a good thing.</p>
@@ -416,42 +420,44 @@ proper spacing allows readers to quickly scan code, extracting semantics quickly
 Functions should <em>not</em> just be laid out as a bare contiguous block of code.</p>
 
 <p><strong>WRONG</strong></p>
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">witness</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="m">4</span><span class="p">)</span>
-	<span class="n">witness</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="no">nil</span>
-	<span class="k">if</span> <span class="n">bytes</span><span class="o">.</span><span class="n">Compare</span><span class="p">(</span><span class="n">pubA</span><span class="p">,</span> <span class="n">pubB</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="m">1</span> <span class="p">{</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
-	<span class="p">}</span>
-	<span class="n">witness</span><span class="p">[</span><span class="m">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">witnessScript</span>
-	<span class="k">return</span> <span class="n">witness</span>
-</code></pre></div></div>
+<div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="x">	</span><span class="n">witness</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="nb">make</span><span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span><span class="x"> </span><span class="m">4</span><span class="p">)</span><span class="x">
+	</span><span class="n">witness</span><span class="p">[</span><span class="m">0</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="no">nil</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">bytes</span><span class="o">.</span><span class="n">Compare</span><span class="p">(</span><span class="n">pubA</span><span class="p">,</span><span class="x"> </span><span class="n">pubB</span><span class="p">)</span><span class="x"> </span><span class="o">==</span><span class="x"> </span><span class="o">-</span><span class="m">1</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigB</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigA</span><span class="x">
+	</span><span class="p">}</span><span class="x"> </span><span class="k">else</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigA</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigB</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+	</span><span class="n">witness</span><span class="p">[</span><span class="m">3</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">witnessScript</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">witness</span><span class="x">
+</span></code></pre>
+</div>
 <p><strong>RIGHT</strong></p>
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">witness</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="m">4</span><span class="p">)</span>
+<div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="x">	</span><span class="n">witness</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="nb">make</span><span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span><span class="x"> </span><span class="m">4</span><span class="p">)</span><span class="x">
 
-	<span class="c">// When spending a p2wsh multi-sig script, rather than an OP_0, we add</span>
-	<span class="c">// a nil stack element to eat the extra pop.</span>
-	<span class="n">witness</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="no">nil</span>
+	</span><span class="c">// When spending a p2wsh multi-sig script, rather than an OP_0, we add</span><span class="x">
+	</span><span class="c">// a nil stack element to eat the extra pop.</span><span class="x">
+	</span><span class="n">witness</span><span class="p">[</span><span class="m">0</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="no">nil</span><span class="x">
 
-	<span class="c">// When initially generating the witnessScript, we sorted the serialized</span>
-	<span class="c">// public keys in descending order. So we do a quick comparison in order</span>
-	<span class="c">// to ensure the signatures appear on the Script Virtual Machine stack in</span>
-	<span class="c">// the correct order.</span>
-	<span class="k">if</span> <span class="n">bytes</span><span class="o">.</span><span class="n">Compare</span><span class="p">(</span><span class="n">pubA</span><span class="p">,</span> <span class="n">pubB</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="m">1</span> <span class="p">{</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigA</span>
-		<span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigB</span>
-	<span class="p">}</span>
+	</span><span class="c">// When initially generating the witnessScript, we sorted the serialized</span><span class="x">
+	</span><span class="c">// public keys in descending order. So we do a quick comparison in order</span><span class="x">
+	</span><span class="c">// to ensure the signatures appear on the Script Virtual Machine stack in</span><span class="x">
+	</span><span class="c">// the correct order.</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">bytes</span><span class="o">.</span><span class="n">Compare</span><span class="p">(</span><span class="n">pubA</span><span class="p">,</span><span class="x"> </span><span class="n">pubB</span><span class="p">)</span><span class="x"> </span><span class="o">==</span><span class="x"> </span><span class="o">-</span><span class="m">1</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigB</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigA</span><span class="x">
+	</span><span class="p">}</span><span class="x"> </span><span class="k">else</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigA</span><span class="x">
+		</span><span class="n">witness</span><span class="p">[</span><span class="m">2</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">sigB</span><span class="x">
+	</span><span class="p">}</span><span class="x">
 
-	<span class="c">// Finally, add the preimage as the last witness element.</span>
-	<span class="n">witness</span><span class="p">[</span><span class="m">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">witnessScript</span>
+	</span><span class="c">// Finally, add the preimage as the last witness element.</span><span class="x">
+	</span><span class="n">witness</span><span class="p">[</span><span class="m">3</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">witnessScript</span><span class="x">
 
-	<span class="k">return</span> <span class="n">witness</span>
-</code></pre></div></div>
+	</span><span class="k">return</span><span class="x"> </span><span class="n">witness</span><span class="x">
+</span></code></pre>
+</div>
 
 <p><a name="Protobuf"></a></p>
 
@@ -479,11 +485,12 @@ rendered by <code class="highlighter-rouge">lncli</code>, all added or modified 
 the proper <code class="highlighter-rouge">json_name</code> option for all fields. An example of such an option can
 be found within the definition of the <code class="highlighter-rouge">DebugLevelResponse</code> struct:</p>
 
-<div class="language-protobuf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">message</span> <span class="nc">DebugLevelResponse</span> <span class="p">{</span>
+<div class="language-protobuf highlighter-rouge"><pre class="highlight"><code><span class="kd">message</span> <span class="nc">DebugLevelResponse</span> <span class="p">{</span>
     <span class="kt">string</span> <span class="na">sub_systems</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">[</span> <span class="na">json_name</span> <span class="o">=</span> <span class="s">"sub_systems"</span> <span class="p">];</span>
 <span class="p">}</span>
 
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Notice how the <code class="highlighter-rouge">json_name</code> field option corresponds with the name of the field
 itself, and uses a <code class="highlighter-rouge">snake_case</code> style of name formatting. All added or modified
@@ -507,15 +514,17 @@ line. Additionally, all arguments should begin in a new line after the
 open paren.</p>
 
     <p><strong>WRONG</strong></p>
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">value</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">bar</span><span class="p">(</span><span class="n">a</span>
-   <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
-</code></pre></div>    </div>
+    <div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="n">value</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">bar</span><span class="p">(</span><span class="n">a</span><span class="x">
+   </span><span class="n">a</span><span class="p">,</span><span class="x"> </span><span class="n">b</span><span class="p">,</span><span class="x"> </span><span class="n">c</span><span class="p">)</span><span class="x">
+</span></code></pre>
+    </div>
 
     <p><strong>RIGHT</strong></p>
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">value</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">bar</span><span class="p">(</span>
-   <span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>    </div>
+    <div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="n">value</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">bar</span><span class="p">(</span><span class="x">
+   </span><span class="n">a</span><span class="p">,</span><span class="x"> </span><span class="n">a</span><span class="p">,</span><span class="x"> </span><span class="n">b</span><span class="p">,</span><span class="x"> </span><span class="n">c</span><span class="p">,</span><span class="x">
+</span><span class="p">)</span><span class="x">
+</span></code></pre>
+    </div>
   </li>
 </ul>
 

@@ -140,7 +140,7 @@ the underlying blockchain, but with modern data processing and latency limits -
 payments can be made nearly as quickly as packets can be sent.</p>
 
 <p>Hash Time-Locked Contracts (HTLCs) allow transactions to be sent between parties
-who do not have a direct channel by routing it through multiple hops, so anyone
+who do not have a direct channel by routing them through multiple hops, so anyone
 connected to the Lightning Network is part of a single, interconnected global
 financial system.</p>
 
@@ -339,7 +339,7 @@ forwards, and revokes payments, responds to potential breaches, and more.
   <li><a href="https://github.com/lightninglabs/neutrino">Neutrino</a> is an experimental
 Bitcoin light client designed to support Lightning mobile clients. This is a
 wallet UI usable with <code class="highlighter-rouge">lnd</code>. Neutrino is not required from an application
-development standpoint, but can be regarded as the primary way for the<br />
+development standpoint, but can be regarded as the primary way for an<br />
 end-user of <code class="highlighter-rouge">lnd</code> to interact with the Bitcoin Network and the applications<br />
 built on top of it.</li>
 </ul>
@@ -377,8 +377,9 @@ contains roughly 4 steps:</p>
   <li><strong>Adding a peer.</strong> Before a channel can be opened between two Lightning
 nodes, they must first be able to securely communicate with each other. This
 is accomplished with the <code class="highlighter-rouge">ConnectPeer</code> RPC method or <code class="highlighter-rouge">connect</code> on <code class="highlighter-rouge">lncli</code>.
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli connect &lt;PUBKEY&gt;@&lt;HOST&gt;:&lt;PORT&gt;
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>lncli connect &lt;PUBKEY&gt;@&lt;HOST&gt;:&lt;PORT&gt;
+</code></pre>
+    </div>
   </li>
   <li><strong>Initiating Channel Opening.</strong> The <code class="highlighter-rouge">OpenChannel</code> method begins the channel
 opening process with a connected peer. Lightning assumes that this is led by
@@ -390,21 +391,24 @@ standard Bitcoin transaction to pay a merchant, they could instead open a
 channel with the push amount representing the amount they want to pay, and
 optionally add some funds of their own, so that both parties can benefit from
 having a channel available for payments in the future.
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli openchannel <span class="nt">--node_key</span><span class="o">=</span>&lt;ID_PUBKEY&gt; <span class="nt">--local_amt</span><span class="o">=</span>&lt;AMOUNT&gt;
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>lncli openchannel --node_key<span class="o">=</span>&lt;ID_PUBKEY&gt; --local_amt<span class="o">=</span>&lt;AMOUNT&gt;
+</code></pre>
+    </div>
     <p><img src="http://i.imgur.com/d5a7DBn.png" alt="Lightning Wallet App Open Channel" style="max-width: 60%;" /></p>
   </li>
   <li><strong>Wait for confirmations.</strong> To prevent double spending attacks on the channel
 opening transaction, users should specify the <code class="highlighter-rouge">--block</code> <code class="highlighter-rouge">lncli</code> command line
 argument. So after initializing the channel opening process, it is often
 required to mine a few blocks:
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>btcctl generate 6
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>btcctl generate 6
+</code></pre>
+    </div>
   </li>
   <li><strong>Close Channel.</strong> If either party in a channel no longer wants to keep it
 open, they can close it at any time with the <code class="highlighter-rouge">CloseChannel</code> method.
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli closechannel <span class="nt">--funding_txid</span><span class="o">=</span>&lt;funding_txid&gt; <span class="nt">--output_index</span><span class="o">=</span>&lt;output_index&gt;
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>lncli closechannel --funding_txid<span class="o">=</span>&lt;funding_txid&gt; --output_index<span class="o">=</span>&lt;output_index&gt;
+</code></pre>
+    </div>
   </li>
 </ol>
 
@@ -466,8 +470,9 @@ parts, and required behavior can be found in <a href="https://github.com/lightni
 expiration time, and an optional memo. If there was already an invoice
 created for this good and it expired, or a sufficient amount of time has
 elapsed, a fresh invoice should be generated.
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli addinvoice <span class="nt">--amt</span><span class="o">=</span>6969 <span class="nt">--memo</span><span class="o">=</span><span class="s2">"A coffee for Roger"</span>
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>lncli addinvoice --amt<span class="o">=</span>6969 --memo<span class="o">=</span><span class="s2">"A coffee for Roger"</span>
+</code></pre>
+    </div>
     <p><img src="http://i.imgur.com/1xYB9Yq.png" alt="Lightning Wallet Generate Payment Request" style="max-width: 60%;" /></p>
   </li>
   <li><strong>Check invoice:</strong> The payer decodes the invoice to see the destination,
@@ -475,21 +480,24 @@ amount and payment hash. This way, they can validate that the invoice was
 legitimate, and that they aren’t being defrauded or overcharged. At this
 stage, the user should also check that the expiration time of the invoice has
 not passed
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli decodepayreq <span class="nt">--pay_req</span><span class="o">=</span>&lt;PAY_REQ&gt;
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>lncli decodepayreq --pay_req<span class="o">=</span>&lt;PAY_REQ&gt;
+</code></pre>
+    </div>
   </li>
   <li><strong>Send payment:</strong> The payer sends their payment, possibly routed through the
 Lightning Network. Developers can do this through an LND interface and end
 users can use the desktop or mobile app.
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;PAY_REQ&gt;
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>lncli sendpayment --pay_req<span class="o">=</span>&lt;PAY_REQ&gt;
+</code></pre>
+    </div>
     <p><img src="http://i.imgur.com/AQMRsZ3.png" alt="Lightning Wallet send payment screen" style="max-width: 60%;" /></p>
   </li>
   <li><strong>Check payment:</strong> The recipient checks that their invoice has been
 fulfilled. They make a call to the <code class="highlighter-rouge">LookupInvoice</code> command, which returns
 this information in the <code class="highlighter-rouge">settled</code> field.
-    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lncli lookupinvoice <span class="nt">--rhash</span><span class="o">=</span>&lt;R_HASH&gt;
-</code></pre></div>    </div>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>lncli lookupinvoice --rhash<span class="o">=</span>&lt;R_HASH&gt;
+</code></pre>
+    </div>
     <p><img src="http://i.imgur.com/Yu8EaBf.png" alt="Lightning Wallet 5BTC Received" style="max-width: 60%;" /></p>
   </li>
 </ol>

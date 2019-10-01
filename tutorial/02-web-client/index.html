@@ -77,12 +77,12 @@ creator himself. Before beginning this step make sure you have <code class="high
 
 <h3 id="setting-up-the-lnd-web-client">Setting up the LND web client</h3>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Clone the repo and move into it:</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># Clone the repo and move into it:</span>
 git clone https://github.com/mably/lncli-web <span class="nv">$GOPATH</span>/src/github.com/mably/lncli-web
 <span class="nb">cd</span> <span class="nv">$GOPATH</span>/src/github.com/mably/lncli-web
 
 <span class="c"># Install dependencies</span>
-npm <span class="nb">install</span>
+npm install
 
 <span class="c"># Setup default configuration files</span>
 <span class="s2">"./node_modules/.bin/gulp"</span> bundle
@@ -92,19 +92,20 @@ npm <span class="nb">install</span>
 <span class="c"># /Users/[username]/Library/Application Support/Lnd/ on Mac OSX</span>
 <span class="c"># $APPDATA/Local/Lnd on Windows. Also change '/CN=localhost/O=lnd' to '//CN=localhost\O=lnd' if you are using Git Bash.</span>
 <span class="nb">cd</span> ~/.lnd
-openssl ecparam <span class="nt">-genkey</span> <span class="nt">-name</span> prime256v1 <span class="nt">-out</span> tls.key
-openssl req <span class="nt">-new</span> <span class="nt">-sha256</span> <span class="nt">-key</span> tls.key <span class="nt">-out</span> csr.csr <span class="nt">-subj</span> <span class="s1">'/CN=localhost/O=lnd'</span>
-openssl req <span class="nt">-x509</span> <span class="nt">-sha256</span> <span class="nt">-days</span> 36500 <span class="nt">-key</span> tls.key <span class="nt">-in</span> csr.csr <span class="nt">-out</span> tls.cert
-<span class="nb">rm </span>csr.csr
-<span class="nb">cp </span>tls.cert <span class="nv">$GOPATH</span>/src/github.com/mably/lncli-web/lnd.cert
+openssl ecparam -genkey -name prime256v1 -out tls.key
+openssl req -new -sha256 -key tls.key -out csr.csr -subj <span class="s1">'/CN=localhost/O=lnd'</span>
+openssl req -x509 -sha256 -days 36500 -key tls.key -in csr.csr -out tls.cert
+rm csr.csr
+cp tls.cert <span class="nv">$GOPATH</span>/src/github.com/mably/lncli-web/lnd.cert
 
 <span class="c"># Start the server to point to our Alice node:</span>
 <span class="nb">cd</span> <span class="nv">$GOPATH</span>/src/github.com/mably/lncli-web
-node server <span class="nt">--lndhost</span><span class="o">=</span>localhost:10001
+node server --lndhost<span class="o">=</span>localhost:10001
 
 <span class="c"># Check out the available command line arguments</span>
-node server <span class="nt">--help</span>
-</code></pre></div></div>
+node server --help
+</code></pre>
+</div>
 
 <p>Open up <a href="http://localhost:8280/"><code class="highlighter-rouge">http://localhost:8280/</code></a> in your browser to see the web dashboard.</p>
 

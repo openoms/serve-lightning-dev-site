@@ -80,32 +80,38 @@ file in Python before you can use it to communicate with lnd.</p>
 
 <ul>
   <li>Create a virtual environment for your project
-    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ virtualenv lnd
-</code></pre></div>    </div>
+    <div class="highlighter-rouge"><pre class="highlight"><code>$ virtualenv lnd
+</code></pre>
+    </div>
   </li>
   <li>Activate the virtual environment
-    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ source lnd/bin/activate
-</code></pre></div>    </div>
+    <div class="highlighter-rouge"><pre class="highlight"><code>$ source lnd/bin/activate
+</code></pre>
+    </div>
   </li>
   <li>Install dependencies (googleapis-common-protos is required due to the use of
 google/api/annotations.proto)
-    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ pip install grpcio grpcio-tools googleapis-common-protos
-</code></pre></div>    </div>
+    <div class="highlighter-rouge"><pre class="highlight"><code>(lnd)$ pip install grpcio grpcio-tools googleapis-common-protos
+</code></pre>
+    </div>
   </li>
   <li>Clone the google api’s repository (required due to the use of
 google/api/annotations.proto)
-    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ git clone https://github.com/googleapis/googleapis.git
-</code></pre></div>    </div>
+    <div class="highlighter-rouge"><pre class="highlight"><code>(lnd)$ git clone https://github.com/googleapis/googleapis.git
+</code></pre>
+    </div>
   </li>
   <li>Copy the lnd rpc.proto file (you’ll find this at
 <a href="https://github.com/lightningnetwork/lnd/blob/master/lnrpc/rpc.proto">lnrpc/rpc.proto</a>)
 or just download it
-    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ curl -o rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
-</code></pre></div>    </div>
+    <div class="highlighter-rouge"><pre class="highlight"><code>(lnd)$ curl -o rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
+</code></pre>
+    </div>
   </li>
   <li>Compile the proto file
-    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lnd)$ python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_python_out=. rpc.proto
-</code></pre></div>    </div>
+    <div class="highlighter-rouge"><pre class="highlight"><code>(lnd)$ python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_python_out=. rpc.proto
+</code></pre>
+    </div>
   </li>
 </ul>
 
@@ -118,23 +124,24 @@ Python gRPC.</p>
 <p>Every time you use Python gRPC, you will have to import the generated rpc modules
 and set up a channel and stub to your connect to your <code class="highlighter-rouge">lnd</code> node:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rpc_pb2</span> <span class="k">as</span> <span class="n">ln</span>
-<span class="kn">import</span> <span class="nn">rpc_pb2_grpc</span> <span class="k">as</span> <span class="n">lnrpc</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rpc_pb2</span> <span class="kn">as</span> <span class="nn">ln</span>
+<span class="kn">import</span> <span class="nn">rpc_pb2_grpc</span> <span class="kn">as</span> <span class="nn">lnrpc</span>
 <span class="kn">import</span> <span class="nn">grpc</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="c1"># Due to updated ECDSA generated tls.cert we need to let gprc know that
-# we need to use that cipher suite otherwise there will be a handhsake
-# error when we communicate with the lnd rpc server.
-</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">"GRPC_SSL_CIPHER_SUITES"</span><span class="p">]</span> <span class="o">=</span> <span class="s">'HIGH+ECDSA'</span>
+<span class="c"># Due to updated ECDSA generated tls.cert we need to let gprc know that</span>
+<span class="c"># we need to use that cipher suite otherwise there will be a handhsake</span>
+<span class="c"># error when we communicate with the lnd rpc server.</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">"GRPC_SSL_CIPHER_SUITES"</span><span class="p">]</span> <span class="o">=</span> <span class="s">'HIGH+ECDSA'</span>
 
-<span class="c1"># Lnd cert is at ~/.lnd/tls.cert on Linux and
-# ~/Library/Application Support/Lnd/tls.cert on Mac
-</span><span class="n">cert</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">'~/.lnd/tls.cert'</span><span class="p">),</span> <span class="s">'rb'</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="c"># Lnd cert is at ~/.lnd/tls.cert on Linux and</span>
+<span class="c"># ~/Library/Application Support/Lnd/tls.cert on Mac</span>
+<span class="n">cert</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">'~/.lnd/tls.cert'</span><span class="p">),</span> <span class="s">'rb'</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 <span class="n">creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_channel_credentials</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
 <span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">secure_channel</span><span class="p">(</span><span class="s">'localhost:10009'</span><span class="p">,</span> <span class="n">creds</span><span class="p">)</span>
 <span class="n">stub</span> <span class="o">=</span> <span class="n">lnrpc</span><span class="o">.</span><span class="n">LightningStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h3 id="examples">Examples</h3>
 
@@ -144,39 +151,42 @@ is at the default <code class="highlighter-rouge">localhost:10009</code>, with a
 
 <h4 id="simple-rpc">Simple RPC</h4>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Retrieve and display the wallet balance
-</span><span class="n">response</span> <span class="o">=</span> <span class="n">stub</span><span class="o">.</span><span class="n">WalletBalance</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">WalletBalanceRequest</span><span class="p">())</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="c"># Retrieve and display the wallet balance</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">stub</span><span class="o">.</span><span class="n">WalletBalance</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">WalletBalanceRequest</span><span class="p">())</span>
 <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">total_balance</span><span class="p">)</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h4 id="response-streaming-rpc">Response-streaming RPC</h4>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">request</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">InvoiceSubscription</span><span class="p">()</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">request</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">InvoiceSubscription</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">invoice</span> <span class="ow">in</span> <span class="n">stub</span><span class="o">.</span><span class="n">SubscribeInvoices</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
     <span class="k">print</span><span class="p">(</span><span class="n">invoice</span><span class="p">)</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Now, create an invoice for your node at <code class="highlighter-rouge">localhost:10009</code>and send a payment to
 it from another node.</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>lncli addinvoice <span class="nt">--amt</span><span class="o">=</span>100
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">$ </span>lncli addinvoice --amt<span class="o">=</span>100
 <span class="o">{</span>
 	<span class="s2">"r_hash"</span>: &lt;R_HASH&gt;,
 	<span class="s2">"pay_req"</span>: &lt;PAY_REQ&gt;
 <span class="o">}</span>
-<span class="nv">$ </span>lncli sendpayment <span class="nt">--pay_req</span><span class="o">=</span>&lt;PAY_REQ&gt;
-</code></pre></div></div>
+<span class="gp">$ </span>lncli sendpayment --pay_req<span class="o">=</span>&lt;PAY_REQ&gt;
+</code></pre>
+</div>
 
 <p>Your Python console should now display the details of the recently satisfied
 invoice.</p>
 
 <h4 id="bidirectional-streaming-rpc">Bidirectional-streaming RPC</h4>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 <span class="kn">import</span> <span class="nn">codecs</span>
 
 <span class="k">def</span> <span class="nf">request_generator</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">amt</span><span class="p">):</span>
-      <span class="c1"># Initialization code here
-</span>      <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="c"># Initialization code here</span>
+      <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="k">print</span><span class="p">(</span><span class="s">"Starting up"</span><span class="p">)</span>
       <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
           <span class="n">request</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">SendRequest</span><span class="p">(</span>
@@ -184,63 +194,67 @@ invoice.</p>
               <span class="n">amt</span><span class="o">=</span><span class="n">amt</span><span class="p">,</span>
           <span class="p">)</span>
           <span class="k">yield</span> <span class="n">request</span>
-          <span class="c1"># Alter parameters here
-</span>          <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+          <span class="c"># Alter parameters here</span>
+          <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
           <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-<span class="c1"># Outputs from lncli are hex-encoded
-</span><span class="n">dest_hex</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">RECEIVER_ID_PUBKEY</span><span class="o">&gt;</span>
+<span class="c"># Outputs from lncli are hex-encoded</span>
+<span class="n">dest_hex</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">RECEIVER_ID_PUBKEY</span><span class="o">&gt;</span>
 <span class="n">dest_bytes</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">dest_hex</span><span class="p">,</span> <span class="s">'hex'</span><span class="p">)</span>
 
 <span class="n">request_iterable</span> <span class="o">=</span> <span class="n">request_generator</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="n">dest_bytes</span><span class="p">,</span> <span class="n">amt</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">payment</span> <span class="ow">in</span> <span class="n">stub</span><span class="o">.</span><span class="n">SendPayment</span><span class="p">(</span><span class="n">request_iterable</span><span class="p">):</span>
     <span class="k">print</span><span class="p">(</span><span class="n">payment</span><span class="p">)</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 <p>This example will send a payment of 100 satoshis every 2 seconds.</p>
 
 <h4 id="using-macaroons">Using Macaroons</h4>
 
 <p>To authenticate using macaroons you need to include the macaroon in the metadata of the request.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">codecs</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">codecs</span>
 
-<span class="c1"># Lnd admin macaroon is at ~/.lnd/data/chain/bitcoin/simnet/admin.macaroon on Linux and
-# ~/Library/Application Support/Lnd/data/chain/bitcoin/simnet/admin.macaroon on Mac
-</span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">'~/.lnd/data/chain/bitcoin/simnet/admin.macaroon'</span><span class="p">),</span> <span class="s">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="c"># Lnd admin macaroon is at ~/.lnd/data/chain/bitcoin/simnet/admin.macaroon on Linux and</span>
+<span class="c"># ~/Library/Application Support/Lnd/data/chain/bitcoin/simnet/admin.macaroon on Mac</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">'~/.lnd/data/chain/bitcoin/simnet/admin.macaroon'</span><span class="p">),</span> <span class="s">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">macaroon_bytes</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="n">macaroon</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">macaroon_bytes</span><span class="p">,</span> <span class="s">'hex'</span><span class="p">)</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>The simplest approach to use the macaroon is to include the metadata in each request as shown below.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">stub</span><span class="o">.</span><span class="n">GetInfo</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">GetInfoRequest</span><span class="p">(),</span> <span class="n">metadata</span><span class="o">=</span><span class="p">[(</span><span class="s">'macaroon'</span><span class="p">,</span> <span class="n">macaroon</span><span class="p">)])</span>
-</code></pre></div></div>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">stub</span><span class="o">.</span><span class="n">GetInfo</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">GetInfoRequest</span><span class="p">(),</span> <span class="n">metadata</span><span class="o">=</span><span class="p">[(</span><span class="s">'macaroon'</span><span class="p">,</span> <span class="n">macaroon</span><span class="p">)])</span>
+</code></pre>
+</div>
 
 <p>However, this can get tiresome to do for each request, so to avoid explicitly including the macaroon we can update the credentials to include it automatically.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">metadata_callback</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
-    <span class="c1"># for more info see grpc docs
-</span>    <span class="n">callback</span><span class="p">([(</span><span class="s">'macaroon'</span><span class="p">,</span> <span class="n">macaroon</span><span class="p">)],</span> <span class="bp">None</span><span class="p">)</span>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">metadata_callback</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+    <span class="c"># for more info see grpc docs</span>
+    <span class="n">callback</span><span class="p">([(</span><span class="s">'macaroon'</span><span class="p">,</span> <span class="n">macaroon</span><span class="p">)],</span> <span class="bp">None</span><span class="p">)</span>
 
 
-<span class="c1"># build ssl credentials using the cert the same as before
-</span><span class="n">cert_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_channel_credentials</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
+<span class="c"># build ssl credentials using the cert the same as before</span>
+<span class="n">cert_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_channel_credentials</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
 
-<span class="c1"># now build meta data credentials
-</span><span class="n">auth_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">metadata_call_credentials</span><span class="p">(</span><span class="n">metadata_callback</span><span class="p">)</span>
+<span class="c"># now build meta data credentials</span>
+<span class="n">auth_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">metadata_call_credentials</span><span class="p">(</span><span class="n">metadata_callback</span><span class="p">)</span>
 
-<span class="c1"># combine the cert credentials and the macaroon auth credentials
-# such that every call is properly encrypted and authenticated
-</span><span class="n">combined_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">composite_channel_credentials</span><span class="p">(</span><span class="n">cert_creds</span><span class="p">,</span> <span class="n">auth_creds</span><span class="p">)</span>
+<span class="c"># combine the cert credentials and the macaroon auth credentials</span>
+<span class="c"># such that every call is properly encrypted and authenticated</span>
+<span class="n">combined_creds</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">composite_channel_credentials</span><span class="p">(</span><span class="n">cert_creds</span><span class="p">,</span> <span class="n">auth_creds</span><span class="p">)</span>
 
-<span class="c1"># finally pass in the combined credentials when creating a channel
-</span><span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">secure_channel</span><span class="p">(</span><span class="s">'localhost:10009'</span><span class="p">,</span> <span class="n">combined_creds</span><span class="p">)</span>
+<span class="c"># finally pass in the combined credentials when creating a channel</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">secure_channel</span><span class="p">(</span><span class="s">'localhost:10009'</span><span class="p">,</span> <span class="n">combined_creds</span><span class="p">)</span>
 <span class="n">stub</span> <span class="o">=</span> <span class="n">lnrpc</span><span class="o">.</span><span class="n">LightningStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
 
-<span class="c1"># now every call will be made with the macaroon already included
-</span><span class="n">stub</span><span class="o">.</span><span class="n">GetInfo</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">GetInfoRequest</span><span class="p">())</span>
-</code></pre></div></div>
+<span class="c"># now every call will be made with the macaroon already included</span>
+<span class="n">stub</span><span class="o">.</span><span class="n">GetInfo</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">GetInfoRequest</span><span class="p">())</span>
+</code></pre>
+</div>
 
 <h3 id="conclusion">Conclusion</h3>
 
